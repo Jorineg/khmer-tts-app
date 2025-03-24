@@ -35,7 +35,6 @@ class SettingsManager:
             "show_overlay": True,
             "overlay_position": "bottom",
             "run_on_startup": True,
-            "minimize_to_tray": True,
         }
         
         # Initialize settings with defaults if they don't exist
@@ -186,8 +185,9 @@ class SettingsManager:
             )
             
             if enable:
-                winreg.SetValueEx(registry_key, APP_NAME, 0, winreg.REG_SZ, f'"{app_path}"')
-                logger.info(f"Added {APP_NAME} to startup registry")
+                # Add --autostart flag to the command line
+                winreg.SetValueEx(registry_key, APP_NAME, 0, winreg.REG_SZ, f'"{app_path}" --autostart')
+                logger.info(f"Added {APP_NAME} to startup registry with autostart flag")
             else:
                 try:
                     winreg.DeleteValue(registry_key, APP_NAME)
@@ -229,3 +229,13 @@ class SettingsManager:
         except Exception as e:
             logger.error(f"Error checking autostart registry: {str(e)}")
             return False
+            
+    def save(self):
+        """
+        Explicitly save all settings and ensure they're synchronized
+        
+        This method ensures all settings are properly saved to persistent storage
+        """
+        self.settings.sync()
+        logger.info("All settings have been saved")
+        return True

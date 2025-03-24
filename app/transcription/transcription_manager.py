@@ -45,22 +45,41 @@ class TranscriptionManager(QObject):
         """Initialize available STT models"""
         logger.info("Initializing STT models")
         
+        # Clear existing models
+        self.models = {}
+        
         # Get current language setting
         language_code = self.settings_manager.get_setting("language", "khm")
         
+        # Get API keys
+        google_api_key = self.settings_manager.get_api_key("google")
+        elevenlabs_api_key = self.settings_manager.get_api_key("elevenlabs")
+        
         try:
-            # Initialize Gemini Flash model
-            self.models["gemini_flash"] = GeminiFlashModel(language_code=language_code)
-            logger.info(f"Initialized Gemini Flash model with language: {language_code}")
+            # Initialize Gemini Flash model if Google API key is available
+            if google_api_key:
+                self.models["gemini_flash"] = GeminiFlashModel(language_code=language_code)
+                logger.info(f"Initialized Gemini Flash model with language: {language_code}")
+            else:
+                logger.warning("Skipping Gemini Flash model initialization - Google API key not found")
         except Exception as e:
             logger.error(f"Failed to initialize Gemini Flash model: {str(e)}")
         
         try:
-            # Initialize ElevenLabs model
-            self.models["elevenlabs"] = ElevenLabsModel(language_code=language_code)
-            logger.info(f"Initialized ElevenLabs model with language: {language_code}")
+            # Initialize ElevenLabs model if ElevenLabs API key is available
+            if elevenlabs_api_key:
+                self.models["elevenlabs"] = ElevenLabsModel(language_code=language_code)
+                logger.info(f"Initialized ElevenLabs model with language: {language_code}")
+            else:
+                logger.warning("Skipping ElevenLabs model initialization - ElevenLabs API key not found")
         except Exception as e:
             logger.error(f"Failed to initialize ElevenLabs model: {str(e)}")
+    
+    def refresh_models(self):
+        """Reinitialize models with current settings and API keys"""
+        logger.info("Refreshing transcription models")
+        self.initialize_models()
+        return list(self.models.keys())
     
     def get_available_models(self):
         """Get a list of available STT models"""

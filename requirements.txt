@@ -2,6 +2,7 @@
 python-dotenv==1.0.1
 keyring==24.1.0
 PyQt5==5.15.9
+psutil==5.9.5
 
 # Audio recording
 pyaudio==0.2.13

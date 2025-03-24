@@ -124,12 +124,19 @@ jobs:
         2. Follow the prompts to complete the installation
         
         Usage:
-        - Press and hold Ctrl+Alt+Space (default shortcut) to record audio
-        - Release to transcribe the audio to text
+        - Press and HOLD Ctrl+Alt+Space (default shortcut) while speaking
+        - RELEASE the shortcut when done speaking to start transcription
+        - The transcribed text will be inserted at your cursor position
         - Access settings through the system tray icon
         
-        The application will start automatically with Windows by default.
-        You can change this and other settings in the application.
+        Important Notes:
+        - You must add at least one API key in the settings to use the application
+        - Gemini Flash is generally faster (1500 free requests per day)
+        - ElevenLabs provides better accuracy for Khmer language (2.5 hours free audio per month)
+        - During recording and transcription, a small overlay will appear on screen
+        
+        The application will show a settings window on first launch.
+        You can configure it to start automatically with Windows.
         
         For more information, visit the project repository.
         "@
@@ -159,9 +166,6 @@ jobs:
         copy "README.txt" release_package\
         copy "install.bat" release_package\
         
-        # Don't create a zip file here - GitHub will automatically archive the files
-        # This prevents the "zip within a zip" issue
-    
     # Read version from version.txt or use build number for testing
     - name: Determine version
       id: get_version
@@ -200,24 +204,29 @@ jobs:
           echo "release_name=Khmer STT Test Build $version" >> $env:GITHUB_OUTPUT
           echo "Creating test build: $version"
         }
+      
+    # Create zip file after version is determined
+    - name: Create Release Zip
+      run: |
+        Compress-Archive -Path "release_package\*" -DestinationPath "KhmerSTT-${{ steps.get_version.outputs.version }}.zip" -Force
         
-    # Create a GitHub release for all builds
-    - name: Create GitHub Release
-      uses: softprops/action-gh-release@v1
-      with:
-        files: |
-          release_package/*
-        name: ${{ steps.get_version.outputs.release_name }}
-        tag_name: build-${{ github.run_number }}
-        prerelease: ${{ steps.get_version.outputs.is_release != 'true' }}
-        draft: false
-        fail_on_unmatched_files: true
-        generate_release_notes: true
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Upload package
+    # Upload artifacts to Actions
+    - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: khmer-stt-package
-        path: release_package/*
+        name: khmer-stt-release-files
+        path: |
+          KhmerSTT-${{ steps.get_version.outputs.version }}.zip
+
+    # Create GitHub Release (if this is a release or tag)
+    - name: Create Release
+      if: steps.get_version.outputs.is_release == 'true'
+      uses: softprops/action-gh-release@v1
+      with:
+        name: ${{ steps.get_version.outputs.release_name }}
+        draft: false
+        prerelease: ${{ github.event.inputs.release_type != 'release' }}
+        tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || format('v{0}', steps.get_version.outputs.version) }}
+        files: |
+          KhmerSTT-${{ steps.get_version.outputs.version }}.zip
+        fail_on_unmatched_files: true

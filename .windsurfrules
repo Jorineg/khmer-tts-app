@@ -16,3 +16,7 @@ Main feature:
  - possibility to change shortcut in settings. Have ctrl+alt+space as default. 
  - use windows credentials manager to store api keys
  - use qt for gui
+
+
+ for any request I make, it is very helpful if you try to find all files that might be relevant and read them.
+ In full! most mistakes you make or issues you try to fix but can't are because you don't fully understand the context and how things are interacting and supposed to work. Don't just assume. Check your assumptions.

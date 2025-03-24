@@ -16,6 +16,7 @@ from PyQt5.QtCore import Qt, QTimer, pyqtSlot, QRect, QSize
 from PyQt5.QtGui import QIcon, QPixmap, QPainter, QColor, QPen, QFont
 
 from .overlay import OverlayWidget
+from .shortcut_recorder import ShortcutRecorder
 from ..audio.recorder import AudioRecorder
 from ..transcription.transcription_manager import TranscriptionManager
 from ..system.text_inserter import TextInserter
@@ -26,12 +27,13 @@ logger = logging.getLogger(__name__)
 class MainWindow(QMainWindow):
     """Main application window"""
     
-    def __init__(self, settings_manager):
+    def __init__(self, settings_manager, show_on_startup=True):
         """
         Initialize the main window
         
         Args:
             settings_manager: SettingsManager instance
+            show_on_startup: Whether to show the window on startup
         """
         super().__init__()
         
@@ -59,11 +61,11 @@ class MainWindow(QMainWindow):
         # Set window icon (same as tray icon)
         self.setWindowIcon(self.create_app_icon())
         
-        # Minimize to tray if configured
-        if self.settings_manager.get_setting("minimize_to_tray", True):
-            self.hide()
-        else:
+        # Show window based on startup parameter
+        if show_on_startup:
             self.show()
+        else:
+            self.hide()
             
         # Start a background thread to preload transcription models
         self.preload_models()
@@ -147,8 +149,8 @@ class MainWindow(QMainWindow):
         button_layout.addStretch()
         
         # Save button
-        save_button = QPushButton("Save Settings")
-        save_button.setFixedWidth(120)  # Set fixed width for the button
+        save_button = QPushButton("Save Settings & Hide")
+        save_button.setFixedWidth(150)  # Set fixed width for the button
         save_button.clicked.connect(self.save_settings)
         button_layout.addWidget(save_button)
         
@@ -168,28 +170,29 @@ class MainWindow(QMainWindow):
         layout.addWidget(icon_label)
         
         # Title label
-        title_label = QLabel("Khmer STT Application")
+        title_label = QLabel("Khmer Speech-to-Text")
         title_label.setAlignment(Qt.AlignCenter)
         title_label.setStyleSheet("font-size: 18px; font-weight: bold;")
         layout.addWidget(title_label)
         
         # Description label
         description_label = QLabel(
-            "Press the configured shortcut to record audio. "
-            "The audio will be transcribed and inserted at the cursor position."
+            "Press and HOLD the configured shortcut while speaking, then RELEASE when done to transcribe. "
+            "The audio will be transcribed and inserted at the cursor position.\n\n"
+            "NOTE: You need to add API keys in the API Keys tab for at least one of the transcription models.\n\n"
+            "• Gemini Flash is generally faster (1500 free requests per day).\n"
+            "• ElevenLabs provides better Khmer language accuracy (2.5 hours free audio per month).\n"
+            "The optimal choice may vary depending on your language."
         )
         description_label.setAlignment(Qt.AlignCenter)
         description_label.setWordWrap(True)
         layout.addWidget(description_label)
         
         # Shortcut label
-        self.shortcut_label = QLabel()
+        self.shortcut_label = QLabel("Current shortcut: loading...")
         self.shortcut_label.setAlignment(Qt.AlignCenter)
         self.shortcut_label.setStyleSheet("font-weight: bold;")
         layout.addWidget(self.shortcut_label)
-        
-        # Update shortcut text
-        self.update_shortcut_label()
         
         # Status area
         status_group = QGroupBox("Current Status")
@@ -217,10 +220,13 @@ class MainWindow(QMainWindow):
         shortcut_group = QGroupBox("Shortcut")
         shortcut_layout = QFormLayout()
         
-        # Shortcut input
-        self.shortcut_input = QLineEdit()
-        self.shortcut_input.setPlaceholderText("Press shortcut to record")
+        # Shortcut input using the custom recorder widget
+        self.shortcut_input = ShortcutRecorder()
+        self.shortcut_input.setPlaceholderText("Click here and press keys to record shortcut")
         shortcut_layout.addRow("Recording shortcut:", self.shortcut_input)
+        
+        # Connect the shortcut recorder's change signal
+        self.shortcut_input.shortcutChanged.connect(self.on_shortcut_changed)
         
         # Set the layout for the shortcut group
         shortcut_group.setLayout(shortcut_layout)
@@ -262,10 +268,6 @@ class MainWindow(QMainWindow):
         # Run on startup checkbox
         self.run_on_startup_checkbox = QCheckBox("Run on Windows startup")
         startup_layout.addRow("", self.run_on_startup_checkbox)
-        
-        # Minimize to tray checkbox
-        self.minimize_to_tray_checkbox = QCheckBox("Minimize to system tray on startup")
-        startup_layout.addRow("", self.minimize_to_tray_checkbox)
         
         # Set the layout for the startup group
         startup_group.setLayout(startup_layout)
@@ -388,8 +390,11 @@ class MainWindow(QMainWindow):
     def load_settings(self):
         """Load current settings into the UI"""
         # General tab
-        shortcut = self.settings_manager.get_setting("shortcut", "ctrl+alt+space")
-        self.shortcut_input.setText(shortcut)
+        shortcut = self.settings_manager.get_setting("shortcut")
+        self.shortcut_input.set_shortcut(shortcut)
+        
+        # Update shortcut label now that shortcut_input exists
+        self.update_shortcut_label()
         
         # Model selection
         model = self.settings_manager.get_setting("transcription_model", "gemini_flash")
@@ -409,9 +414,6 @@ class MainWindow(QMainWindow):
         # Startup
         run_on_startup = self.settings_manager.get_setting("run_on_startup", True)
         self.run_on_startup_checkbox.setChecked(run_on_startup)
-        
-        minimize_to_tray = self.settings_manager.get_setting("minimize_to_tray", True)
-        self.minimize_to_tray_checkbox.setChecked(minimize_to_tray)
         
         # API keys tab
         google_api_key = self.settings_manager.get_api_key("google") or ""
@@ -436,8 +438,12 @@ class MainWindow(QMainWindow):
     def save_settings(self):
         """Save settings from the UI"""
         try:
+            # Store current API keys to detect changes
+            old_google_api_key = self.settings_manager.get_api_key("google") or ""
+            old_elevenlabs_api_key = self.settings_manager.get_api_key("elevenlabs") or ""
+
             # General tab
-            shortcut = self.shortcut_input.text()
+            shortcut = self.shortcut_input.get_shortcut()
             self.settings_manager.set_setting("shortcut", shortcut)
             
             model = self.model_combo.currentData()
@@ -452,33 +458,63 @@ class MainWindow(QMainWindow):
             run_on_startup = self.run_on_startup_checkbox.isChecked()
             self.settings_manager.set_setting("run_on_startup", run_on_startup)
             
-            minimize_to_tray = self.minimize_to_tray_checkbox.isChecked()
-            self.settings_manager.set_setting("minimize_to_tray", minimize_to_tray)
-            
             # API keys tab
+            api_keys_changed = False
+            
             google_api_key = self.google_api_key_input.text()
             if google_api_key:
+                if google_api_key != old_google_api_key:
+                    api_keys_changed = True
                 self.settings_manager.set_api_key("google", google_api_key)
             
             elevenlabs_api_key = self.elevenlabs_api_key_input.text()
             if elevenlabs_api_key:
+                if elevenlabs_api_key != old_elevenlabs_api_key:
+                    api_keys_changed = True
                 self.settings_manager.set_api_key("elevenlabs", elevenlabs_api_key)
             
             # Language tab
             language_code = self.language_combo.currentData()
+            old_language_code = self.settings_manager.get_setting("language", "khm")
+            language_changed = language_code != old_language_code
             self.settings_manager.set_setting("language", language_code)
             
             # Insertion method
             insertion_method = "clipboard" if self.clipboard_radio.isChecked() else "keypress"
             self.settings_manager.set_setting("insertion_method", insertion_method)
             
+            # Explicitly save all settings to persistent storage
+            self.settings_manager.save()
+            
             # Update UI elements that depend on settings
             self.update_shortcut_label()
             
             # Update keyboard listener shortcut if changed
-            new_shortcut = self.shortcut_input.text()
+            new_shortcut = self.shortcut_input.get_shortcut()
             if hasattr(self, 'keyboard_thread') and self.keyboard_thread:
                 self.keyboard_thread.update_shortcut(new_shortcut)
+            
+            # Refresh transcription models if API keys or language changed
+            if api_keys_changed or language_changed:
+                available_models = self.transcription_manager.refresh_models()
+                logger.info(f"Refreshed transcription models after API key change: {available_models}")
+                self.status_label.setText("Transcription models refreshed")
+                
+                # Show notification
+                self.tray_icon.showMessage(
+                    "Settings Saved",
+                    "Your settings have been saved and transcription models refreshed.",
+                    QSystemTrayIcon.Information,
+                    3000
+                )
+            else:
+                # Regular notification
+                self.tray_icon.showMessage(
+                    "Settings Saved",
+                    "Your settings have been saved successfully.",
+                    QSystemTrayIcon.Information,
+                    3000
+                )
             
             # No confirmation dialog, just minimize to tray
             self.hide()
@@ -580,18 +616,26 @@ class MainWindow(QMainWindow):
         self.transcription_manager.transcription_completed.connect(self.on_transcription_completed)
         self.transcription_manager.transcription_error.connect(self.on_transcription_error)
         
-        # Load settings on show
-        self.tabs.currentChanged.connect(self.on_tab_changed)
-    
     def on_tab_changed(self, index):
         """Handle tab changed event"""
-        # If switching to a settings tab, load the latest settings
-        if index > 0:  # First tab (index 0) is the overview
-            self.load_settings()
+        # We don't need to reload settings when changing tabs as it overwrites unsaved changes
+        pass
     
     def update_shortcut_label(self):
-        """Update the shortcut label with the current shortcut"""
-        shortcut = self.settings_manager.get_setting("shortcut", "ctrl+alt+space")
+        """Update the shortcut label in the overview tab"""
+        # Check if shortcut_input exists yet
+        if hasattr(self, 'shortcut_input') and self.shortcut_input:
+            shortcut = self.shortcut_input.text() 
+        else:
+            # Fallback if shortcut_input isn't created yet
+            shortcut = self.settings_manager.get_setting("shortcut", "Ctrl + Alt + Space")
+            
+        # Format for display if it's in the internal format
+        if '+' in shortcut and ' ' not in shortcut:
+            parts = shortcut.split('+')
+            formatted_parts = [p.capitalize() for p in parts]
+            shortcut = " + ".join(formatted_parts)
+            
         self.shortcut_label.setText(f"Current shortcut: {shortcut}")
     
     def show_main_window(self):
@@ -735,13 +779,6 @@ class MainWindow(QMainWindow):
             insertion_method = self.settings_manager.get_setting("insertion_method", "clipboard")
             self.text_inserter.insert_text_async(text, insertion_method)
             
-            # Show notification
-            self.tray_icon.showMessage(
-                "Transcription Completed",
-                "The transcribed text has been inserted.",
-                QSystemTrayIcon.Information,
-                3000
-            )
         else:
             logger.warning("Empty transcription result")
             
@@ -779,3 +816,12 @@ class MainWindow(QMainWindow):
             QSystemTrayIcon.Critical,
             3000
         )
+    
+    def on_shortcut_changed(self, shortcut):
+        """Handle shortcut changes from the recorder widget"""
+        logger.info(f"Shortcut changed to: {shortcut}")
+        self.update_shortcut_label()
+        
+        # Update keyboard listener shortcut immediately (don't wait for save)
+        if hasattr(self, 'keyboard_thread') and self.keyboard_thread:
+            self.keyboard_thread.update_shortcut(shortcut)
