@@ -152,15 +152,15 @@ jobs:
             Set-Content -Path "LICENSE.txt" -Value $licenseContent
         }
         
-        # Package files individually (not in a zip) to avoid nested zip
+        # Package files individually to avoid nested zip
         mkdir -Force release_package
         copy "dist\Khmer STT.exe" release_package\
         copy "LICENSE.txt" release_package\
         copy "README.txt" release_package\
         copy "install.bat" release_package\
         
-        # Create a simple zip file
-        Compress-Archive -Path "release_package\*" -DestinationPath "KhmerSTT_Package.zip" -Force
+        # Don't create a zip file here - GitHub will automatically archive the files
+        # This prevents the "zip within a zip" issue
     
     # Read version from version.txt or use build number for testing
     - name: Determine version
@@ -205,7 +205,8 @@ jobs:
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v1
       with:
-        files: KhmerSTT_Package.zip
+        files: |
+          release_package/*
         name: ${{ steps.get_version.outputs.release_name }}
         tag_name: build-${{ github.run_number }}
         prerelease: ${{ steps.get_version.outputs.is_release != 'true' }}
@@ -215,14 +216,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Upload executable
-      uses: actions/upload-artifact@v4
-      with:
-        name: khmer-stt-exe
-        path: dist/Khmer STT.exe
-        
     - name: Upload package
       uses: actions/upload-artifact@v4
       with:
         name: khmer-stt-package
-        path: KhmerSTT_Package.zip
+        path: release_package/*
