@@ -116,10 +116,11 @@ class OverviewTab(QWidget):
         # Extract the text parts
         instructions_text = self.get_string("overview_tab.instructions")
         api_keys_info = self.get_string("overview_tab.api_keys_info")
+        api_keys_info2 = self.get_string("overview_tab.api_keys_info2")
         api_keys_link = f"<a href='#api_keys' style='color: #3498db;'>{self.get_string('overview_tab.api_keys_link')}</a>"
-        
+
         # Set rich text with clickable link
-        self.instructions_label.setText(f"{instructions_text}\n\n<b>{api_keys_info}</b>\n{api_keys_link}")
+        self.instructions_label.setText(f"{instructions_text}\n\n<b>{api_keys_info}\n{api_keys_link} {api_keys_info2} to set up your API keys.</b>")
         
         # Connect the link clicked signal
         self.instructions_label.linkActivated.connect(self.on_api_keys_link_clicked)
@@ -201,7 +202,7 @@ class OverviewTab(QWidget):
         api_keys_link = f"<a href='#api_keys' style='color: #3498db;'>{self.get_string('overview_tab.api_keys_link')}</a>"
         
         # Set rich text with clickable link
-        self.instructions_label.setText(f"{instructions_text}\n\n<b>{api_keys_info}</b>\n{api_keys_link}")
+        self.instructions_label.setText(f"{instructions_text}\n\n<b>{api_keys_info}</b>\n{api_keys_link} to set up your API keys.")
         
         # Features group
         self.features_group.setTitle(self.get_string("overview_tab.features"))

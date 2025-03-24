@@ -388,8 +388,8 @@ class MainWindow(BaseWindow):
         if show_overlay:
             # Show overlay before recording
             self.overlay.set_recording_state()
-            # Position the overlay before showing it - no need to pass position to show()
-            self.overlay.position_at_bottom()
+            # Position the overlay before showing it
+            self.overlay.position_overlay(overlay_position)
             self.overlay.show()
             
             # Delayed start of recording to ensure overlay is visible
@@ -429,6 +429,8 @@ class MainWindow(BaseWindow):
             
             # Update overlay
             self.overlay.set_transcribing_state()
+            overlay_position = self.settings_manager.get_setting("overlay_position")
+            self.overlay.position_overlay(overlay_position)
             
             # Start transcription
             default_model = self.settings_manager.get_setting("default_model")

@@ -57,7 +57,6 @@ MODIFIER_MAP = {
 
 class ShortcutRecorder(QLineEdit):
     """Widget for recording keyboard shortcuts"""
-    
     shortcutChanged = pyqtSignal(str)
     
     def __init__(self, *args, **kwargs):
@@ -88,6 +87,7 @@ class ShortcutRecorder(QLineEdit):
         
         # Log for debugging
         logger.debug("ShortcutRecorder started recording")
+
     
     def focusOutEvent(self, event):
         """Called when the widget loses focus"""
@@ -100,6 +100,7 @@ class ShortcutRecorder(QLineEdit):
         
         # Log for debugging
         logger.debug(f"ShortcutRecorder stopped recording. Final shortcut: {self.text()}")
+        self.shortcutChanged.emit(self.key_string)
     
     def keyPressEvent(self, event: QKeyEvent):
         """Handle key press events"""
@@ -139,7 +140,7 @@ class ShortcutRecorder(QLineEdit):
             
         # If all keys are released and we had a non-modifier key,
         # finish recording
-        if not self.current_keys and key not in MODIFIER_KEYS:
+        if not self.current_keys:
             self.clearFocus()
     
     def _update_display(self):

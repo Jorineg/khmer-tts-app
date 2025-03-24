@@ -71,12 +71,16 @@
       "km": "ដំណើរការជាមួយវាលអត្ថបទណាមួយ\nផ្លូវកាត់គ្រាប់ចុចងាយស្រួល\nគាំទ្រភាសាខ្មែរ\nប្រើម៉ូដែល AI ទំនើបបំផុត\nដំណើរការក្រៅបណ្តាញជាមួយម៉ូដែលមួយចំនួន"
     },
     "api_keys_info": {
-      "en": "Important: To use this application, you need to set up at least one API key for the transcription service you want to use.",
+      "en": "Important: To use this application, you need to set up at least one API key for the transcription service you want to use. Go to the",
       "km": "សំខាន់៖ ដើម្បីប្រើកម្មវិធីនេះ អ្នកត្រូវរៀបចំយ៉ាងហោចណាស់លេខកូដ API មួយសម្រាប់សេវាកម្មចម្លងដែលអ្នកចង់ប្រើ។"
     },
     "api_keys_link": {
-      "en": "Go to the API Keys tab to set up your API keys.",
-      "km": "ទៅកាន់ផ្ទាំង API Keys ដើម្បីរៀបចំលេខកូដ API របស់អ្នក។"
+      "en": "API Keys tab",
+      "km": "ផ្ទាំង API Keys"
+    },
+    "api_keys_info2": {
+      "en": "to set up your API keys.",
+      "km": "ដើម្បីរៀបចំយ៉ាងហោចណាស់លេខកូដ API របស់អ្នក។"
     }
   },
   "general_tab": {
@@ -109,8 +113,8 @@
       "km": "គំរូចម្លង"
     },
     "default_model": {
-      "en": "Default model:",
-      "km": "គំរូលំនាំដើម៖"
+      "en": "Model:",
+      "km": "គំរូ៖"
     },
     "model_google": {
       "en": "Google Gemini Flash",

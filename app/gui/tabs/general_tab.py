@@ -4,7 +4,7 @@ General settings tab for the main application window
 
 import logging
 from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QFormLayout, 
-                            QGroupBox, QLabel, QLineEdit, QComboBox, QCheckBox)
+                            QGroupBox, QLabel, QComboBox, QCheckBox)
 from PyQt5.QtCore import Qt
 
 from ..shortcut_recorder import ShortcutRecorder
@@ -40,6 +40,7 @@ class GeneralTab(QWidget):
         
         # Shortcut Group
         self.shortcut_group = QGroupBox(self.get_string("general_tab.shortcut_group"))
+        self.shortcut_group.setStyleSheet("QGroupBox { font-weight: bold; color: #2980b9; }")
         shortcut_layout = QVBoxLayout()
         shortcut_layout.setContentsMargins(15, 15, 15, 15)
         
@@ -53,19 +54,10 @@ class GeneralTab(QWidget):
         shortcut_input_layout = QHBoxLayout()
         self.shortcut_label = QLabel(self.get_string("general_tab.recording_shortcut"))
         self.shortcut_label.setStyleSheet("font-weight: bold;")
-        self.shortcut_input = QLineEdit()
+        self.shortcut_input = ShortcutRecorder()
         self.shortcut_input.setPlaceholderText(self.get_string("general_tab.shortcut_placeholder"))
-        self.shortcut_input.setReadOnly(True)
         self.shortcut_input.setMaximumWidth(250)
-        self.shortcut_input.setStyleSheet("""
-            QLineEdit {
-                border: 1px solid #d0d0d0;
-                border-radius: 3px;
-                padding: 5px;
-                background-color: #ffffff;
-                height: 16px;
-            }
-        """)
+        self.shortcut_input.shortcutChanged.connect(self.on_shortcut_changed)
         shortcut_input_layout.addWidget(self.shortcut_label)
         shortcut_input_layout.addWidget(self.shortcut_input)
         shortcut_input_layout.addStretch()
@@ -76,6 +68,7 @@ class GeneralTab(QWidget):
         
         # Model Group
         self.model_group = QGroupBox(self.get_string("general_tab.model_group"))
+        self.model_group.setStyleSheet("QGroupBox { font-weight: bold; color: #2980b9; }")
         model_layout = QVBoxLayout()
         model_layout.setContentsMargins(15, 15, 15, 15)
         
@@ -114,6 +107,7 @@ class GeneralTab(QWidget):
         
         # Appearance Group
         self.appearance_group = QGroupBox(self.get_string("general_tab.appearance_group"))
+        self.appearance_group.setStyleSheet("QGroupBox { font-weight: bold; color: #2980b9; }")
         appearance_layout = QVBoxLayout()
         appearance_layout.setContentsMargins(15, 15, 15, 15)
         
@@ -160,6 +154,7 @@ class GeneralTab(QWidget):
         
         # Startup Group
         self.startup_group = QGroupBox(self.get_string("general_tab.startup_group"))
+        self.startup_group.setStyleSheet("QGroupBox { font-weight: bold; color: #2980b9; }")
         startup_layout = QVBoxLayout()
         startup_layout.setContentsMargins(15, 15, 15, 15)
         
@@ -190,7 +185,7 @@ class GeneralTab(QWidget):
             
         # Load shortcut
         shortcut = self.settings_manager.get_setting("shortcut")
-        self.shortcut_input.setText(shortcut)
+        self.shortcut_input.set_shortcut(shortcut)
         
         # Load default model
         default_model = self.settings_manager.get_setting("default_model")
@@ -213,9 +208,6 @@ class GeneralTab(QWidget):
     
     def connect_signals(self):
         """Connect signal handlers for UI controls"""
-        # Shortcut signal
-        # self.shortcut_input.shortcutChanged.connect(self.on_shortcut_changed)
-        
         # Model combo signal
         self.model_combo.currentIndexChanged.connect(self.on_model_changed)
         
@@ -268,7 +260,10 @@ class GeneralTab(QWidget):
     
     def on_shortcut_changed(self):
         """Handle shortcut change"""
-        shortcut = self.shortcut_input.text()
+        shortcut = self.shortcut_input.get_shortcut()
+        
+        # Log the shortcut change
+        logger.info(f"Shortcut changed to: {shortcut}")
         
         # Save to settings
         if self.settings_manager:

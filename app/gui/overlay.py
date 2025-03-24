@@ -29,7 +29,7 @@ class OverlayWidget(QWidget):
         self.setup_window()
         
         # Pre-position the overlay at startup to avoid delay
-        self.position_at_bottom()
+        self.position_overlay("bottom")
         
         # Pre-render the overlay to avoid delay when showing
         self.prepare_states()
@@ -239,6 +239,33 @@ class OverlayWidget(QWidget):
         
         # Set position and size
         self.setGeometry(x, y, width, height)
+    
+    def position_at_top(self):
+        """Position the overlay at the top of the screen"""
+        # Get screen geometry
+        screen_geometry = self.screen().geometry()
+        
+        # Calculate position
+        width = 200  # Fixed width
+        height = 60  # Fixed height
+        x = (screen_geometry.width() - width) // 2
+        y = 50  # 50px from top
+        
+        # Set position and size
+        self.setGeometry(x, y, width, height)
+    
+    def position_overlay(self, position):
+        """
+        Position the overlay according to the specified position
+        
+        Args:
+            position: Position ("top" or "bottom")
+        """
+        if position == "top":
+            self.position_at_top()
+        else:
+            # Default to bottom
+            self.position_at_bottom()
         
     def set_recording_state(self):
         """Set the overlay to recording state"""
