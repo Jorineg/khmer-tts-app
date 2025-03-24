@@ -1,0 +1,133 @@
+name: Build Khmer TTS Application
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.11
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pyinstaller
+        
+    - name: Create resources directory if it doesn't exist
+      run: |
+        if (-not (Test-Path resources)) {
+          New-Item -ItemType Directory -Path resources
+        }
+        
+    - name: Create icon
+      run: python create_icon.py
+      
+    - name: Build with PyInstaller
+      run: |
+        pyinstaller --clean --icon=resources/icon.ico --add-data="resources;resources" --hidden-import=keyring.backends.Windows --hidden-import=pynput.keyboard._win32 --hidden-import=pynput.mouse._win32 --hidden-import=google.generativeai --hidden-import=elevenlabs --collect-all=pynput --collect-all=elevenlabs --collect-all=pyaudio --collect-all=keyring --collect-all=google.generativeai --noconsole --name="Khmer TTS" main.py
+        
+    - name: Create Inno Setup script
+      run: |
+        $content = @"
+        #define MyAppName "Khmer TTS"
+        #define MyAppVersion "1.0.0"
+        #define MyAppPublisher "Khmer TTS"
+        #define MyAppURL "https://www.khmertts.com/"
+        #define MyAppExeName "Khmer TTS.exe"
+        
+        [Setup]
+        AppId={{76D75E0C-27C7-4401-A419-F43D3C2B30DE}
+        AppName={#MyAppName}
+        AppVersion={#MyAppVersion}
+        AppPublisher={#MyAppPublisher}
+        AppPublisherURL={#MyAppURL}
+        AppSupportURL={#MyAppURL}
+        AppUpdatesURL={#MyAppURL}
+        DefaultDirName={autopf}\{#MyAppName}
+        DefaultGroupName={#MyAppName}
+        DisableProgramGroupPage=yes
+        LicenseFile=LICENSE.txt
+        OutputDir=installer
+        OutputBaseFilename=KhmerTTS_Setup
+        Compression=lzma
+        SolidCompression=yes
+        WizardStyle=modern
+        
+        [Languages]
+        Name: "english"; MessagesFile: "compiler:Default.isl"
+        
+        [Tasks]
+        Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+        Name: "startmenu"; Description: "Create Start Menu shortcuts"; GroupDescription: "{cm:AdditionalIcons}";
+        Name: "autostart"; Description: "Start automatically when Windows starts"; GroupDescription: "Windows Integration";
+        
+        [Files]
+        Source: "dist\Khmer TTS\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+        
+        [Icons]
+        Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
+        Name: "{group}\Uninstall {#MyAppName}"; Filename: "{uninstallexe}"
+        Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
+        
+        [Registry]
+        Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "Khmer TTS"; ValueData: "{app}\{#MyAppExeName}"; Flags: uninsdeletevalue; Tasks: autostart
+        
+        [Run]
+        Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
+        "@
+        
+        Set-Content -Path "installer.iss" -Value $content
+        
+    - name: Create LICENSE file
+      run: |
+        $content = @"
+        MIT License
+        
+        Copyright (c) 2025 Khmer TTS
+        
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+        
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+        
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+        "@
+        
+        Set-Content -Path "LICENSE.txt" -Value $content
+        
+    - name: Install Inno Setup
+      run: |
+        Invoke-WebRequest -Uri "https://jrsoftware.org/download.php/is.exe" -OutFile "is.exe"
+        Start-Process -FilePath "is.exe" -ArgumentList "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-" -Wait
+        
+    - name: Create installer with Inno Setup
+      run: |
+        & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
+        
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: khmer-tts-installer
+        path: installer/KhmerTTS_Setup.exe

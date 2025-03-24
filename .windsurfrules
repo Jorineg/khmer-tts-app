@@ -1,0 +1,18 @@
+I work in windows 11.
+
+The goal is to build a standalone application for win11.
+python based. for development python is okay, but later I want installer that comes with python and is user friendly.
+
+Main feature:
+ - adds a shortcut that works everywhere! (i.e. every text field, browser, etc)
+ - while whortcut is hold, it records audio via built-in microphone
+ - if released, stores to file, and transcribes it using two possible models.
+ - transcription is inserted (simulated keypress or pasted somehow? should work everywhere where text can be enerted, should support khmer language.)
+ - during recording and transcription, there is a small elegant overlay that shows the current state at bottom of screen
+ - shows tray icon if running. when clicked, opens settings dialog
+ - in settings, api keys can be set (for google and elevenlabs)
+ - use two transcriptions models for now, with possibility to add more in the future: gemini flash and elevenlabs
+ - possibility to set language in settings windows (adapt in gemini prompt and in elevenlabs api call accordingly. Probably need to store a mapping for all lanugages and codes or use package that provides this since gemini and needs full name (in the prompt) and elevenlabs uses iso code)
+ - possibility to change shortcut in settings. Have ctrl+alt+space as default. 
+ - use windows credentials manager to store api keys
+ - use qt for gui

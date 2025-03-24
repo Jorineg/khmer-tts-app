@@ -1,0 +1,23 @@
+# Core dependencies
+python-dotenv==1.0.1
+keyring==24.1.0
+PyQt5==5.15.9
+
+# Audio recording
+pyaudio==0.2.13
+wave==0.0.2
+
+# Keyboard and clipboard
+pynput==1.7.6
+pyperclip==1.8.2
+
+# Google Gemini API
+google.generativeai==0.8.4
+
+# ElevenLabs API
+elevenlabs
+
+# For packaging the application
+pyinstaller==6.1.0
+
+
