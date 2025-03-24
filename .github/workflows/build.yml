@@ -22,7 +22,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install pyinstaller
+        pip install pyinstaller pillow
         
     - name: Create resources directory if it doesn't exist
       run: |
@@ -31,11 +31,42 @@ jobs:
         }
         
     - name: Create icon
-      run: python create_icon.py
+      run: |
+        try {
+          python create_icon.py
+        } catch {
+          Write-Host "Icon creation failed, creating simple fallback icon..."
+          $iconContent = @"
+          from PIL import Image, ImageDraw
+          
+          # Create a blank image with transparent background
+          size = (256, 256)
+          img = Image.new('RGBA', size, color=(0, 0, 0, 0))
+          draw = ImageDraw.Draw(img)
+          
+          # Draw a simple K letter
+          draw.rectangle([50, 50, 206, 206], fill=(66, 133, 244, 255), outline=(25, 75, 175, 255), width=8)
+          draw.line([(80, 80), (80, 176)], fill=(255, 255, 255, 255), width=15)
+          draw.line([(80, 128), (130, 80)], fill=(255, 255, 255, 255), width=15)
+          draw.line([(80, 128), (130, 176)], fill=(255, 255, 255, 255), width=15)
+          draw.line([(150, 110), (200, 110)], fill=(255, 255, 255, 255), width=15)
+          draw.line([(150, 146), (200, 146)], fill=(255, 255, 255, 255), width=15)
+          
+          # Save as PNG
+          img.save('resources/icon.png')
+          
+          # Save as ICO
+          img.save('resources/icon.ico', format='ICO', sizes=[(256, 256), (128, 128), (64, 64), (32, 32), (16, 16)])
+          "@
+          
+          # Save the script and run it
+          Set-Content -Path "create_fallback_icon.py" -Value $iconContent
+          python create_fallback_icon.py
+        }
       
     - name: Build with PyInstaller
       run: |
-        pyinstaller --clean --icon=resources/icon.ico --add-data="resources;resources" --hidden-import=keyring.backends.Windows --hidden-import=pynput.keyboard._win32 --hidden-import=pynput.mouse._win32 --hidden-import=google.generativeai --hidden-import=elevenlabs --collect-all=pynput --collect-all=elevenlabs --collect-all=pyaudio --collect-all=keyring --collect-all=google.generativeai --noconsole --name="Khmer TTS" main.py
+        pyinstaller --clean --icon=resources/icon.ico --add-data="resources;resources" --hidden-import=keyring.backends.Windows --hidden-import=pynput.keyboard._win32 --hidden-import=pynput.mouse._win32 --hidden-import=google.generativeai --hidden-import=elevenlabs --collect-all=pynput --collect-all=elevenlabs --collect-all=pyaudio --collect-all=keyring --collect-all=google.generativeai --onefile --noconsole --name="Khmer TTS" main.py
         
     - name: Create Inno Setup script
       run: |
@@ -73,7 +104,7 @@ jobs:
         Name: "autostart"; Description: "Start automatically when Windows starts"; GroupDescription: "Windows Integration";
         
         [Files]
-        Source: "dist\Khmer TTS\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+        Source: "dist\Khmer TTS.exe"; DestDir: "{app}"; Flags: ignoreversion
         
         [Icons]
         Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"

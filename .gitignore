@@ -19,13 +19,22 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+MANIFEST
 
-# Environment variables
+# PyInstaller
+*.manifest
+*.spec
+!khmer_tts.spec
+
+# Environments
 .env
+.env.example
 .venv
 env/
 venv/
 ENV/
+env.bak/
+venv.bak/
 
 # IDE files
 .idea/
@@ -41,3 +50,14 @@ ENV/
 
 # Log files
 *.log
+
+# Build artifacts
+dll_cache/
+*.dll
+installer/
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/

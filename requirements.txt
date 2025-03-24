@@ -19,5 +19,4 @@ elevenlabs
 
 # For packaging the application
 pyinstaller==6.1.0
-
-
+pillow==10.4.0

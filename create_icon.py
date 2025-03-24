@@ -33,7 +33,21 @@ try:
 
     # Draw text
     text = "KH"
-    text_width, text_height = draw.textsize(text, font=font)
+    # Use getbbox or getsize based on Pillow version
+    text_bbox = None
+    try:
+        # For newer Pillow versions
+        text_bbox = font.getbbox(text)
+        text_width = text_bbox[2] - text_bbox[0]
+        text_height = text_bbox[3] - text_bbox[1]
+    except AttributeError:
+        # For older Pillow versions
+        try:
+            text_width, text_height = font.getsize(text)
+        except:
+            # Fallback to a hardcoded estimate if both methods fail
+            text_width, text_height = icon_size // 2, icon_size // 2
+    
     position = ((icon_size - text_width) // 2, (icon_size - text_height) // 2 - 10)
     draw.text(position, text, fill=(255, 255, 255), font=font)
 except Exception as e:
@@ -49,10 +63,14 @@ print(f"Created icon at {png_path}")
 # Save as ICO for Windows
 try:
     ico_path = os.path.join(resources_dir, "icon.ico")
-    # Need to convert to a format that supports ICO
-    icon_image = image.convert("RGBA")
-    icon_image.save(ico_path)
-    print(f"Created icon at {ico_path}")
+    # Create multiple sizes for the ICO file
+    image.save(ico_path, format='ICO', sizes=[(256, 256), (128, 128), (64, 64), (32, 32), (16, 16)])
+    print(f"Created ICO at {ico_path}")
 except Exception as e:
     print(f"Could not create ICO file: {e}")
-    print("Please install Pillow with 'pip install pillow' to create the ICO file.")
+    # Try another method
+    try:
+        image.save(ico_path, format='ICO')
+        print(f"Created basic ICO at {ico_path}")
+    except:
+        print("Failed to create ICO file completely.")
