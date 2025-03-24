@@ -12,6 +12,7 @@ import errno
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import Qt, QTimer, pyqtSignal
 
+# Import the main window implementation
 from app.gui.main_window import MainWindow
 from app.system.keyboard_listener import start_keyboard_listener
 from app.settings.settings_manager import SettingsManager
@@ -87,6 +88,39 @@ def acquire_lock():
     try:
         if sys.platform == 'win32':
             try:
+                # Check if the lock file exists
+                if os.path.exists(LOCK_FILE):
+                    try:
+                        # Try to read PID from the file
+                        with open(LOCK_FILE, 'r') as f:
+                            pid_str = f.read().strip()
+                            
+                        if pid_str:
+                            try:
+                                pid = int(pid_str)
+                                # Check if the process with this PID is still running
+                                import psutil
+                                if not psutil.pid_exists(pid) or pid == os.getpid():
+                                    logger.info(f"Stale lock file found with PID {pid}, removing it")
+                                    os.remove(LOCK_FILE)
+                                else:
+                                    # Process is still running, another instance exists
+                                    logger.info("Lock file exists with valid PID, another instance is running")
+                                    create_signal_file()
+                                    return None, False
+                            except (ValueError, ProcessLookupError):
+                                # Invalid PID or process doesn't exist
+                                logger.info("Invalid PID in lock file, removing it")
+                                os.remove(LOCK_FILE)
+                            except ImportError:
+                                # psutil not available, continue with normal check
+                                logger.info("Lock file exists but can't verify PID, assuming another instance")
+                                create_signal_file()
+                                return None, False
+                    except Exception as e:
+                        logger.error(f"Error reading PID from lock file: {e}")
+                        # Continue and try to create a new lock file
+                
                 # Try to create the lock file (Windows-specific)
                 lock_handle = os.open(LOCK_FILE, os.O_CREAT | os.O_EXCL | os.O_RDWR)
                 # Write PID to file
@@ -168,24 +202,27 @@ class SingleApplication(QApplication):
     def show_window(self):
         """Show and activate the main window"""
         if self.activation_window:
-            logger.info("Showing window due to signal file")
-            
-            # Show and activate the window
-            self.activation_window.show()
-            self.activation_window.activateWindow()
-            self.activation_window.raise_()
-            
-            # Force window to front using Windows API
-            if sys.platform == 'win32':
-                try:
-                    # Get the window handle
-                    window_handle = self.activation_window.winId()
-                    
-                    # Use Windows API to bring window to front
-                    ShowWindow(int(window_handle), SW_RESTORE)
-                    SetForegroundWindow(int(window_handle))
-                except Exception as e:
-                    logger.error(f"Failed to bring window to front: {e}")
+            logger.info("Signal received, showing main window")
+            try:
+                # Show window
+                self.activation_window.show_main_window()
+                
+                # Try to bring window to front (Windows-specific)
+                if sys.platform == 'win32':
+                    try:
+                        hwnd = self.activation_window.winId()
+                        # Get current foreground window
+                        foreground_hwnd = GetForegroundWindow()
+                        
+                        # If our window is not foreground
+                        if foreground_hwnd != hwnd:
+                            # Show window and bring to front
+                            ShowWindow(hwnd, SW_SHOW)
+                            SetForegroundWindow(hwnd)
+                    except Exception as e:
+                        logger.error(f"Failed to bring window to front: {e}")
+            except Exception as e:
+                logger.error(f"Failed to bring window to front: {e}")
         else:
             logger.warning("Signal received but no activation window set")
 

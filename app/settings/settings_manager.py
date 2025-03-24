@@ -30,11 +30,15 @@ class SettingsManager:
         # Default settings
         self.defaults = {
             "shortcut": "ctrl+alt+space",
+            "default_model": "gemini_flash",
             "transcription_model": "gemini_flash",
             "language": "khm",
+            "ui_language": "en",
             "show_overlay": True,
             "overlay_position": "bottom",
             "run_on_startup": True,
+            "insertion_method": "clipboard",
+            "model_selection": "Google Gemini Flash",
         }
         
         # Initialize settings with defaults if they don't exist

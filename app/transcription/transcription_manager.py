@@ -49,7 +49,7 @@ class TranscriptionManager(QObject):
         self.models = {}
         
         # Get current language setting
-        language_code = self.settings_manager.get_setting("language", "khm")
+        language_code = self.settings_manager.get_setting("language")
         
         # Get API keys
         google_api_key = self.settings_manager.get_api_key("google")
@@ -100,7 +100,7 @@ class TranscriptionManager(QObject):
         
         # Get model from settings if not specified
         if model_name is None:
-            model_name = self.settings_manager.get_setting("transcription_model", "gemini_flash")
+            model_name = self.settings_manager.get_setting("transcription_model")
         
         # Check if model is available
         if model_name not in self.models:
@@ -110,7 +110,7 @@ class TranscriptionManager(QObject):
             return
         
         # Get current language setting
-        language_code = self.settings_manager.get_setting("language", "khm")
+        language_code = self.settings_manager.get_setting("language")
         
         # Reinitialize model with current language if it has changed 
         # (models store language at initialization time)

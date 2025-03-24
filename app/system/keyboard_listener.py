@@ -165,7 +165,7 @@ class KeyboardThread(QThread):
 def start_keyboard_listener(main_window):
     """Start the keyboard listener thread"""
     # Get the configured shortcut from settings
-    shortcut = main_window.settings_manager.get_setting("shortcut", "ctrl+alt+space")
+    shortcut = main_window.settings_manager.get_setting("shortcut")
     logger.info(f"Starting keyboard listener with shortcut: {shortcut}")
     
     # Create and start keyboard listener thread

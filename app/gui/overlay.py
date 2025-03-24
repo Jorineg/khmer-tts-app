@@ -12,9 +12,12 @@ logger = logging.getLogger(__name__)
 class OverlayWidget(QWidget):
     """Overlay widget displayed during recording and transcription"""
     
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, translation_manager=None):
         """Initialize the overlay widget"""
         super().__init__(parent)
+        
+        # Store the translation manager
+        self.translation_manager = translation_manager
         
         # Current state - initialize before setting up the UI
         self.current_state = "idle"
@@ -110,6 +113,12 @@ class OverlayWidget(QWidget):
         # Set initial icons
         self.update_icons()
         
+    def get_string(self, key, **kwargs):
+        """Get a translated string using the translation manager"""
+        if self.translation_manager:
+            return self.translation_manager.get_string(key, **kwargs)
+        return key
+        
     def update_icons(self):
         """Update the icons based on the current state"""
         if self.current_state == "recording":
@@ -132,6 +141,15 @@ class OverlayWidget(QWidget):
                 background-color: #3498db;
                 border-radius: 6px;
             """)
+        elif self.current_state == "error":
+            # Error icon (red exclamation mark)
+            pixmap = QPixmap(24, 24)
+            pixmap.fill(Qt.transparent)
+            self.icon_label.setPixmap(pixmap)
+            self.icon_label.setStyleSheet("""
+                background-color: #e74c3c;
+                border-radius: 12px;
+            """)
         else:
             # Idle icon (empty)
             self.icon_label.setStyleSheet("")
@@ -144,29 +162,35 @@ class OverlayWidget(QWidget):
         Pre-render all states of the overlay to avoid delay when showing
         """
         # Prepare recording state
-        self.status_label.setText("Recording...")
+        self.status_label.setText(self.get_string("status.recording"))
         self.progress_bar.setRange(0, 0)
         self.current_state = "recording"
         self.update_icons()
         
         # Prepare transcribing state
-        self.status_label.setText("Transcribing...")
+        self.status_label.setText(self.get_string("status.transcribing"))
         self.current_state = "transcribing"
         self.update_icons()
         
+        # Prepare error state
+        self.status_label.setText(self.get_string("status.error"))
+        self.current_state = "error"
+        self.update_icons()
+        
         # Reset to idle state
-        self.status_label.setText("Idle")
+        self.status_label.setText(self.get_string("status.idle"))
         self.progress_bar.setRange(0, 1)
         self.progress_bar.setValue(0)
         self.current_state = "idle"
         self.update_icons()
         
-    def set_state(self, state):
+    def set_state(self, state, error_message=None):
         """
         Set the current state of the overlay
         
         Args:
-            state: Current state (idle, recording, transcribing)
+            state: Current state (idle, recording, transcribing, error)
+            error_message: Optional error message for error state
         """
         # Only update if state has changed
         if self.current_state == state:
@@ -175,21 +199,30 @@ class OverlayWidget(QWidget):
         self.current_state = state
         
         if state == "idle":
-            self.status_label.setText("Idle")
+            self.status_label.setText(self.get_string("status.idle"))
             self.progress_bar.setRange(0, 1)
             self.progress_bar.setValue(0)
             self.hide()
         elif state == "recording":
-            self.status_label.setText("Recording...")
+            self.status_label.setText(self.get_string("status.recording"))
             self.progress_bar.setRange(0, 0)  # Indeterminate
             # Update icons before showing for smoother transition
             self.update_icons()
             # Use show() instead of setVisible for faster display
             self.show()
         elif state == "transcribing":
-            self.status_label.setText("Transcribing...")
+            self.status_label.setText(self.get_string("status.transcribing"))
             self.progress_bar.setRange(0, 0)  # Indeterminate
             # Update icons before showing for smoother transition
+            self.update_icons()
+            self.show()
+        elif state == "error":
+            if error_message:
+                self.status_label.setText(f"{self.get_string('status.error')}: {error_message}")
+            else:
+                self.status_label.setText(self.get_string("status.error"))
+            self.progress_bar.setRange(0, 1)
+            self.progress_bar.setValue(0)
             self.update_icons()
             self.show()
         
@@ -206,3 +239,24 @@ class OverlayWidget(QWidget):
         
         # Set position and size
         self.setGeometry(x, y, width, height)
+        
+    def set_recording_state(self):
+        """Set the overlay to recording state"""
+        self.set_state("recording")
+        
+    def set_transcribing_state(self):
+        """Set the overlay to transcribing state"""
+        self.set_state("transcribing")
+        
+    def set_idle_state(self):
+        """Set the overlay to idle state"""
+        self.set_state("idle")
+        
+    def set_error_state(self, error_message=None):
+        """
+        Set the overlay to error state
+        
+        Args:
+            error_message: Optional error message (not displayed in overlay)
+        """
+        self.set_state("error")

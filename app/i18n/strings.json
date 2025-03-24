@@ -1,0 +1,340 @@
+{
+  "app_name": {
+    "en": "Khmer STT",
+    "km": "Khmer STT"
+  },
+  "window_title": {
+    "en": "Khmer STT",
+    "km": "Khmer STT"
+  },
+  "tray_tooltip": {
+    "en": "Khmer STT - Speech to Text",
+    "km": "Khmer STT - សំឡេងទៅជាអក្សរ"
+  },
+  "tabs": {
+    "overview": {
+      "en": "Overview",
+      "km": "ទិដ្ឋភាពទូទៅ"
+    },
+    "general": {
+      "en": "General",
+      "km": "ទូទៅ"
+    },
+    "api_keys": {
+      "en": "API Keys",
+      "km": "លេខកូដ API"
+    },
+    "language": {
+      "en": "Language",
+      "km": "ភាសា"
+    }
+  },
+  "overview_tab": {
+    "title": {
+      "en": "Khmer Speech-to-Text",
+      "km": "កម្មវិធីបំប្លែងសំឡេងទៅជាអក្សរខ្មែរ"
+    },
+    "app_info": {
+      "en": "Application Information",
+      "km": "ព័ត៌មានកម្មវិធី"
+    },
+    "app_description": {
+      "en": "This application allows you to quickly transcribe speech in Khmer and other languages using AI. Hold down the shortcut key to record your voice, then release to transcribe.",
+      "km": "កម្មវិធីនេះអនុញ្ញាតឱ្យអ្នកចម្លងការនិយាយជាភាសាខ្មែរ និងភាសាផ្សេងទៀតយ៉ាងរហ័សដោយប្រើបញ្ញាសិប្បនិម្មិត។ សង្កត់គ្រាប់ចុចផ្លូវកាត់ដើម្បីថតសំឡេងរបស់អ្នក បន្ទាប់មកលែងដើម្បីចម្លង។"
+    },
+    "description": {
+      "en": "Quickly transcribe spoken Khmer language to text using AI. The app works in any text field.",
+      "km": "ចម្លងភាសាខ្មែរដែលបាននិយាយទៅជាអត្ថបទយ៉ាងឆាប់រហ័សដោយប្រើ AI។ កម្មវិធីនេះដំណើរការនៅក្នុងវាលអត្ថបទណាមួយ។"
+    },
+    "current_shortcut": {
+      "en": "Current shortcut: {shortcut}",
+      "km": "ផ្លូវកាត់បច្ចុប្បន្ន៖ {shortcut}"
+    },
+    "status": {
+      "en": "Status",
+      "km": "ស្ថានភាព"
+    },
+    "current_status": {
+      "en": "Current status:",
+      "km": "ស្ថានភាពបច្ចុប្បន្ន៖"
+    },
+    "instructions": {
+      "en": "Press and hold the shortcut key (shown above) to start recording. Release the key to finish recording and begin transcription.",
+      "km": "សង្កត់និងទប់គ្រាប់ចុចផ្លូវកាត់ (បង្ហាញខាងលើ) ដើម្បីចាប់ផ្តើមថត។ ​ដោះគ្រាប់ចុចដើម្បីបញ្ចប់ការថត និងចាប់ផ្តើមបកប្រែ។"
+    },
+    "features": {
+      "en": "Features",
+      "km": "លក្ខណៈពិសេស"
+    },
+    "feature_list": {
+      "en": "Works with any text field\nSimple one-key shortcut\nSupports Khmer language\nUses state-of-the-art AI models\nWorks offline with some models",
+      "km": "ដំណើរការជាមួយវាលអត្ថបទណាមួយ\nផ្លូវកាត់គ្រាប់ចុចងាយស្រួល\nគាំទ្រភាសាខ្មែរ\nប្រើម៉ូដែល AI ទំនើបបំផុត\nដំណើរការក្រៅបណ្តាញជាមួយម៉ូដែលមួយចំនួន"
+    },
+    "api_keys_info": {
+      "en": "Important: To use this application, you need to set up at least one API key for the transcription service you want to use.",
+      "km": "សំខាន់៖ ដើម្បីប្រើកម្មវិធីនេះ អ្នកត្រូវរៀបចំយ៉ាងហោចណាស់លេខកូដ API មួយសម្រាប់សេវាកម្មចម្លងដែលអ្នកចង់ប្រើ។"
+    },
+    "api_keys_link": {
+      "en": "Go to the API Keys tab to set up your API keys.",
+      "km": "ទៅកាន់ផ្ទាំង API Keys ដើម្បីរៀបចំលេខកូដ API របស់អ្នក។"
+    }
+  },
+  "general_tab": {
+    "title": {
+      "en": "General",
+      "km": "ទូទៅ"
+    },
+    "shortcut_group": {
+      "en": "Shortcut Key",
+      "km": "គ្រាប់ចុចផ្លូវកាត់"
+    },
+    "shortcut": {
+      "en": "Recording Shortcut:",
+      "km": "ផ្លូវកាត់សម្រាប់ថត:"
+    },
+    "shortcut_description": {
+      "en": "Set the keyboard shortcut for starting and stopping recording. Hold the shortcut down to record, release to transcribe.",
+      "km": "កំណត់ផ្លូវកាត់ក្ដារចុចសម្រាប់ចាប់ផ្តើម និងបញ្ឈប់ការថត។ សង្កត់ផ្លូវកាត់ដើម្បីថត ដកចេញដើម្បីចម្លង។"
+    },
+    "recording_shortcut": {
+      "en": "Recording shortcut:",
+      "km": "ផ្លូវកាត់សម្រាប់ថត៖"
+    },
+    "shortcut_placeholder": {
+      "en": "Press shortcut keys to record...",
+      "km": "ចុចគ្រាប់ចុចផ្លូវកាត់ដើម្បីថត..."
+    },
+    "model_group": {
+      "en": "Transcription Model",
+      "km": "គំរូចម្លង"
+    },
+    "default_model": {
+      "en": "Default model:",
+      "km": "គំរូលំនាំដើម៖"
+    },
+    "model_google": {
+      "en": "Google Gemini Flash",
+      "km": "ហ្គូហ្គល Gemini Flash"
+    },
+    "model_elevenlabs": {
+      "en": "ElevenLabs",
+      "km": "ElevenLabs"
+    },
+    "model_gemini": {
+      "en": "Gemini Flash",
+      "km": "ហ្សេមីនី ហ្វ្លាស"
+    },
+    "appearance_group": {
+      "en": "Appearance",
+      "km": "រូបរាង"
+    },
+    "show_overlay": {
+      "en": "Show recording overlay",
+      "km": "បង្ហាញបន្ទាប់ការថត"
+    },
+    "overlay_position": {
+      "en": "Overlay position:",
+      "km": "ទីតាំងបន្ទាប់ការថត៖"
+    },
+    "position_bottom": {
+      "en": "Bottom of screen",
+      "km": "ផ្នែកខាងក្រោមនៃអេក្រង់"
+    },
+    "position_top": {
+      "en": "Top of screen",
+      "km": "ផ្នែកខាងលើនៃអេក្រង់"
+    },
+    "startup_group": {
+      "en": "Startup Options",
+      "km": "ជម្រើសចាប់ផ្តើម"
+    },
+    "run_on_startup": {
+      "en": "Run on system startup",
+      "km": "ដំណើរការនៅពេលប្រព័ន្ធចាប់ផ្តើម"
+    },
+    "start_minimized": {
+      "en": "Start minimized to system tray",
+      "km": "ចាប់ផ្តើមបង្រួមទៅថាសប្រព័ន្ធ"
+    },
+    "startup_description": {
+      "en": "Note: The app will always run in the background even when closed unless you explicitly quit through the tray icon.",
+      "km": "ចំណាំ៖ កម្មវិធីនឹងដំណើរការនៅផ្ទៃខាងក្រោយជានិច្ច ទោះបីជាបានបិទ លុះត្រាតែអ្នកចាកចេញយ៉ាងច្បាស់លាស់តាមរយៈរូបតំណាងថាស។"
+    }
+  },
+  "api_keys_tab": {
+    "title": {
+      "en": "API Keys",
+      "km": "អាប់ផេតអេភីអាយ"
+    },
+    "google_api_key": {
+      "en": "Google Gemini API Key",
+      "km": "កូនសោ API Google Gemini"
+    },
+    "google_description": {
+      "en": "Enter your Google Gemini API key to use Google's speech recognition service. You can get a free API key from Google AI Studio.",
+      "km": "បញ្ចូលកូនសោ API Google Gemini របស់អ្នកដើម្បីប្រើសេវាកម្មស្គាល់សំឡេងរបស់ Google។ អ្នកអាចទទួលបានកូនសោ API ឥតគិតថ្លៃពី Google AI Studio។"
+    },
+    "google_get_key": {
+      "en": "Get API key here",
+      "km": "ទទួលបានកូនសោ API នៅទីនេះ"
+    },
+    "elevenlabs_api_key": {
+      "en": "ElevenLabs API Key",
+      "km": "កូនសោ API ElevenLabs"
+    },
+    "elevenlabs_description": {
+      "en": "Enter your ElevenLabs API key to use their speech recognition service. You can get a free API key from ElevenLabs website.",
+      "km": "បញ្ចូលកូនសោ API ElevenLabs របស់អ្នកដើម្បីប្រើសេវាកម្មស្គាល់សំឡេងរបស់ពួកគេ។ អ្នកអាចទទួលបានកូនសោ API ឥតគិតថ្លៃពីគេហទំព័រ ElevenLabs។"
+    },
+    "elevenlabs_get_key": {
+      "en": "Get API key here",
+      "km": "ទទួលបានកូនសោ API នៅទីនេះ"
+    },
+    "api_key_placeholder": {
+      "en": "Enter your API key here",
+      "km": "បញ្ចូលកូនសោ API របស់អ្នកនៅទីនេះ"
+    },
+    "api_key_note": {
+      "en": "Note: API keys are stored securely in your system's credentials manager.",
+      "km": "ចំណាំ៖ កូនសោ API ត្រូវបានរក្សាទុកប្រកបដោយសុវត្ថិភាពនៅក្នុងកម្មវិធីគ្រប់គ្រងព័ត៌មានសម្ងាត់របស់ប្រព័ន្ធរបស់អ្នក។"
+    }
+  },
+  "language_tab": {
+    "title": {
+      "en": "Language",
+      "km": "ភាសា"
+    },
+    "select_language": {
+      "en": "Transcription Language",
+      "km": "ភាសាសម្រាប់ការបំប្លែងសំឡេងទៅជាអក្សរ"
+    },
+    "language_description": {
+      "en": "Select the language you'll be speaking in when recording your voice. This helps the transcription model better understand your speech.",
+      "km": "ជ្រើសរើសភាសាដែលអ្នកនឹងនិយាយពេលថតសំឡេងរបស់អ្នក។ វាជួយឱ្យម៉ូដែលបំប្លែងសំឡេងយល់ពីការនិយាយរបស់អ្នកបានកាន់តែប្រសើរ។"
+    },
+    "language_note": {
+      "en": "Note: The transcription quality depends on the selected language and the clarity of your speech.",
+      "km": "ចំណាំ៖ គុណភាពនៃការបំប្លែងសំឡេងទៅជាអក្សរអាស្រ័យលើភាសាដែលបានជ្រើសរើស និងភាពច្បាស់នៃការនិយាយរបស់អ្នក។"
+    },
+    "transcription_models": {
+      "en": "Transcription Models",
+      "km": "ម៉ូដែលបំប្លែងសំឡេង"
+    },
+    "models_description": {
+      "en": "Select which transcription service to use. Different models may perform better for different languages.",
+      "km": "ជ្រើសរើសសេវាកម្មបំប្លែងសំឡេងដែលត្រូវប្រើប្រាស់។ ម៉ូដែលផ្សេងគ្នាអាចដំណើរការបានល្អសម្រាប់ភាសាផ្សេងៗគ្នា។"
+    }
+  },
+  "buttons": {
+    "hide_window": {
+      "en": "Hide Window",
+      "km": "លាក់បង្អួច"
+    },
+    "quit": {
+      "en": "Quit",
+      "km": "ចាកចេញ"
+    },
+    "open": {
+      "en": "Open",
+      "km": "បើក"
+    },
+    "exit": {
+      "en": "Exit",
+      "km": "ចេញ"
+    }
+  },
+  "notifications": {
+    "settings_saved_title": {
+      "en": "Settings Saved",
+      "km": "ការកំណត់ត្រូវបានរក្សាទុក"
+    },
+    "settings_saved_with_refresh": {
+      "en": "Your settings have been saved and transcription models refreshed.",
+      "km": "ការកំណត់របស់អ្នកត្រូវបានរក្សាទុក ហើយម៉ូដែលចម្លងត្រូវបានធ្វើបច្ចុប្បន្នភាព។"
+    },
+    "settings_saved": {
+      "en": "Your settings have been saved successfully.",
+      "km": "ការកំណត់របស់អ្នកត្រូវបានរក្សាទុកដោយជោគជ័យ។"
+    },
+    "models_refreshed": {
+      "en": "Transcription models have been refreshed.",
+      "km": "ម៉ូដែលចម្លងត្រូវបានធ្វើបច្ចុប្បន្នភាព។"
+    },
+    "transcription_error_title": {
+      "en": "Transcription Error",
+      "km": "កំហុសក្នុងការចម្លង"
+    },
+    "transcription_error": {
+      "en": "Error during transcription: {error}",
+      "km": "មានបញ្ហាក្នុងអំឡុងពេលចម្លង៖ {error}"
+    },
+    "transcription_failed_title": {
+      "en": "Transcription Failed",
+      "km": "ការចម្លងបរាជ័យ"
+    },
+    "transcription_empty": {
+      "en": "The transcription result was empty.",
+      "km": "លទ្ធផលចម្លងគឺទទេ។"
+    },
+    "keep_running_notice": {
+      "en": "The application will keep running in the system tray. To terminate the program, choose 'Exit' in the context menu of the system tray icon.",
+      "km": "កម្មវិធីនឹងបន្តដំណើរការនៅក្នុង System Tray។ ដើម្បីបញ្ចប់កម្មវិធី សូមជ្រើសរើស 'ចាកចេញ' នៅក្នុងម៉ឺនុយបរិបទនៃរូបតំណាង System Tray។"
+    },
+    "keep_running_notice_quit_button": {
+      "en": "The application will keep running in the system tray. To terminate the program completely, use the 'Quit' button in the main window.",
+      "km": "កម្មវិធីនឹងបន្តដំណើរការនៅក្នុង System Tray។ ដើម្បីបញ្ចប់កម្មវិធីទាំងស្រុង សូមប្រើប៊ូតុង 'ចាកចេញ' នៅក្នុងបង្អួចមេ។"
+    }
+  },
+  "language_selector": {
+    "english": {
+      "en": "English",
+      "km": "English"
+    },
+    "khmer": {
+      "en": "Khmer",
+      "km": "ខ្មែរ"
+    }
+  },
+  "ui": {
+    "language": {
+      "en": "UI Language",
+      "km": "ភាសានៃអ៊ីនធឺហ្វេស"
+    }
+  },
+  "dialogs": {
+    "minimize_to_tray": {
+      "en": "Application will minimize to the system tray.",
+      "km": "កម្មវិធីនឹងបង្រួមទៅការថាសប្រព័ន្ធ។"
+    },
+    "error": {
+      "en": "Error",
+      "km": "កំហុស"
+    },
+    "save_error": {
+      "en": "Error saving settings: {error}",
+      "km": "កំហុសក្នុងការរក្សាទុកការកំណត់៖ {error}"
+    }
+  },
+  "status": {
+    "ready": {
+      "en": "Ready",
+      "km": "រួចរាល់"
+    },
+    "idle": {
+      "en": "Ready",
+      "km": "រួចរាល់"
+    },
+    "recording": {
+      "en": "Recording...",
+      "km": "កំពុងថត..."
+    },
+    "transcribing": {
+      "en": "Transcribing...",
+      "km": "កំពុងបំប្លែងសំឡេងទៅជាអក្សរ..."
+    },
+    "error": {
+      "en": "Error",
+      "km": "កំហុស"
+    }
+  }
+}

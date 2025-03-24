@@ -1,5 +1,5 @@
 """
-Main application window and system tray icon
+Main application window
 """
 
 import os
@@ -7,24 +7,25 @@ import sys
 import logging
 import threading
 from PyQt5.QtWidgets import (
-    QMainWindow, QSystemTrayIcon, QMenu, QAction, QWidget, QTabWidget,
-    QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QMessageBox,
-    QFormLayout, QLineEdit, QComboBox, QCheckBox, QGroupBox, QSpinBox,
-    QRadioButton, QButtonGroup
+    QWidget, QTabWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QMessageBox, QApplication
 )
-from PyQt5.QtCore import Qt, QTimer, pyqtSlot, QRect, QSize
-from PyQt5.QtGui import QIcon, QPixmap, QPainter, QColor, QPen, QFont
+from PyQt5.QtCore import Qt, QTimer, pyqtSlot, QSize
+from PyQt5.QtGui import QIcon
 
+from .base_window import BaseWindow
+from .tray_manager import TrayManager
+from .language_selector import LanguageSelector
+from .tabs import OverviewTab, GeneralTab, ApiKeysTab, LanguageTab
 from .overlay import OverlayWidget
-from .shortcut_recorder import ShortcutRecorder
 from ..audio.recorder import AudioRecorder
 from ..transcription.transcription_manager import TranscriptionManager
 from ..system.text_inserter import TextInserter
 from ..settings.settings_manager import SettingsManager
+from ..i18n.translation_manager import TranslationManager
 
 logger = logging.getLogger(__name__)
 
-class MainWindow(QMainWindow):
+class MainWindow(BaseWindow):
     """Main application window"""
     
     def __init__(self, settings_manager, show_on_startup=True):
@@ -35,9 +36,11 @@ class MainWindow(QMainWindow):
             settings_manager: SettingsManager instance
             show_on_startup: Whether to show the window on startup
         """
-        super().__init__()
+        # Initialize base window
+        super().__init__(settings_manager)
         
-        self.settings_manager = settings_manager
+        # Initialize translation manager
+        self.translation_manager = TranslationManager(settings_manager)
         
         # Initialize components - do this before UI setup to start preloading
         self.init_components()
@@ -58,8 +61,8 @@ class MainWindow(QMainWindow):
         self.recording = False
         self.transcribing = False
         
-        # Set window icon (same as tray icon)
-        self.setWindowIcon(self.create_app_icon())
+        # Set window title
+        self.setWindowTitle(self.translation_manager.get_string("window_title"))
         
         # Show window based on startup parameter
         if show_on_startup:
@@ -87,11 +90,8 @@ class MainWindow(QMainWindow):
     def init_overlay(self):
         """Initialize the overlay"""
         # Create overlay and make it ready
-        self.overlay = OverlayWidget()
-        
-        # Preload overlay states
-        # This is now handled in OverlayWidget.__init__
-        
+        self.overlay = OverlayWidget(translation_manager=self.translation_manager)
+    
     def preload_models(self):
         """Preload transcription models in a background thread"""
         def _preload():
@@ -110,533 +110,231 @@ class MainWindow(QMainWindow):
         
     def setup_ui(self):
         """Set up the UI elements"""
-        # Set window properties
-        self.setWindowTitle("Khmer STT")
-        self.setMinimumWidth(500)
-        self.setMinimumHeight(500)
-        
-        # Central widget
-        central_widget = QWidget()
-        self.setCentralWidget(central_widget)
-        
-        # Main layout
-        main_layout = QVBoxLayout(central_widget)
+        # Create main widget and layout
+        main_widget = QWidget()
+        main_layout = QVBoxLayout(main_widget)
+        main_layout.setContentsMargins(16, 16, 16, 16)
+        main_layout.setSpacing(8)  # Reduced spacing overall
         
         # Create tab widget
         self.tabs = QTabWidget()
         
-        # Create tabs
-        self.create_overview_tab()
-        self.create_general_tab()
-        self.create_api_keys_tab()
-        self.create_language_tab()
-        
-        # Add tabs
-        self.tabs.addTab(self.overview_tab, "Overview")
-        self.tabs.addTab(self.general_tab, "General")
-        self.tabs.addTab(self.api_keys_tab, "API Keys")
-        self.tabs.addTab(self.language_tab, "Language")
+        # Set up tabs
+        self.create_tabs()
         
         # Add tabs to main layout
         main_layout.addWidget(self.tabs)
         
-        # Save button container (right-aligned)
+        # Add language selector above the button container
+        self.language_selector = LanguageSelector(self, self.translation_manager)
+        self.language_selector.languageChanged.connect(self.change_language)
+        main_layout.addWidget(self.language_selector)
+        
+        # Button container
         button_container = QWidget()
         button_layout = QHBoxLayout(button_container)
-        button_layout.setContentsMargins(0, 0, 0, 0)
+        button_layout.setContentsMargins(0, 20, 0, 0)
         
-        # Add spacer to push button to the right
+        # Spacer to push buttons to the right side
         button_layout.addStretch()
         
-        # Save button
-        save_button = QPushButton("Save Settings & Hide")
-        save_button.setFixedWidth(150)  # Set fixed width for the button
-        save_button.clicked.connect(self.save_settings)
-        button_layout.addWidget(save_button)
+        # Quit button (now more subtle)
+        self.quit_button = QPushButton(self.translation_manager.get_string("buttons.quit"))
+        self.quit_button.setStyleSheet("""
+            QPushButton {
+                background-color: transparent;
+                color: #555555;
+                border: 1px solid #d0d0d0;
+                padding: 8px 16px;
+                border-radius: 4px;
+            }
+            QPushButton:hover {
+                background-color: #f0f0f0;
+            }
+            QPushButton:pressed {
+                background-color: #e0e0e0;
+            }
+        """)
+        self.quit_button.setCursor(Qt.PointingHandCursor)
+        self.quit_button.setFixedWidth(120)
+        self.quit_button.clicked.connect(QApplication.quit)
+        button_layout.addWidget(self.quit_button)
+        
+        # Add some spacing between buttons
+        button_layout.addSpacing(10)
+        
+        # Hide Window button (subtle with blue border)
+        self.hide_button = QPushButton(self.translation_manager.get_string("buttons.hide_window"))
+        self.hide_button.setStyleSheet("""
+            QPushButton {
+                background-color: white;
+                color: #3498db;
+                border: 1px solid #3498db;
+                padding: 8px 16px;
+                border-radius: 4px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #ecf0f1;
+            }
+            QPushButton:pressed {
+                background-color: #d6e9f8;
+            }
+        """)
+        self.hide_button.setCursor(Qt.PointingHandCursor)
+        self.hide_button.setFixedWidth(120)
+        self.hide_button.clicked.connect(self.hide)
+        self.hide_button.setDefault(True)
+        button_layout.addWidget(self.hide_button)
         
         # Add button container to main layout
         main_layout.addWidget(button_container)
+        
+        # Set central widget
+        self.setCentralWidget(main_widget)
+        
+        # Apply global stylesheet
+        self.setStyleSheet("""
+            QMainWindow, QDialog {
+                background-color: #f5f5f7;
+                font-family: 'Segoe UI', Arial, sans-serif;
+            }
+            
+            QPushButton {
+                background-color: #3498db;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 4px;
+                font-weight: 500;
+            }
+            
+            QPushButton:hover {
+                background-color: #2980b9;
+            }
+            
+            QPushButton:pressed {
+                background-color: #1c6ea4;
+            }
+            
+            QTabWidget::pane {
+                border: 1px solid #d0d0d0;
+                background-color: white;
+                border-radius: 5px;
+            }
+            
+            QTabBar::tab {
+                background-color: #e6e6e6;
+                color: #555555;
+                padding: 8px 16px;
+                border-top-left-radius: 4px;
+                border-top-right-radius: 4px;
+                border: 1px solid #d0d0d0;
+                border-bottom: none;
+                min-width: 80px;
+            }
+            
+            QTabBar::tab:selected {
+                background-color: white;
+                border-bottom-color: white;
+                color: #3498db;
+            }
+            
+            QGroupBox {
+                font-weight: bold;
+                border: 1px solid #d0d0d0;
+                border-radius: 5px;
+                margin-top: 12px;
+                padding-top: 10px;
+            }
+            
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 5px;
+            }
+            
+            QLabel {
+                color: #333333;
+            }
+            
+            /* Define styles for input widgets */
+            QComboBox, QLineEdit, QSpinBox, QDoubleSpinBox, QDateEdit, QTimeEdit, QDateTimeEdit {
+                border: 1px solid #d0d0d0;
+                border-radius: 3px;
+                padding: 5px;
+                background-color: #ffffff;
+                selection-background-color: #3498db;
+                selection-color: #ffffff;
+                height: 16px;
+            }
+            
+            /* Custom dropdown arrow using the arrow image */
+            QComboBox::drop-down {
+                subcontrol-origin: padding;
+                subcontrol-position: top right;
+                width: 20px;
+                border-left: 1px solid #d0d0d0;
+            }
+            
+            QComboBox::down-arrow {
+                image: url(resources/arrow_down.png);
+                width: 16px;
+                height: 16px;
+            }
+            
+            /* Rest of the stylesheet remains the same */
+        """)
+        
+        # Set window properties
+        self.setWindowTitle("Khmer Speech-to-Text")
+        self.setWindowIcon(QIcon(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "resources", "icon.png")))
+        self.setMinimumSize(600, 500)
+        
+        # Create the tray icon is handled in setup_tray() which is called from __init__
     
-    def create_overview_tab(self):
-        """Create the overview tab"""
-        self.overview_tab = QWidget()
-        layout = QVBoxLayout()
+    def create_tabs(self):
+        """Create all tabs and add them to the tab widget"""
+        # Create tab instances
+        self.overview_tab = OverviewTab(self, self.windowIcon(), self.translation_manager)
+        self.general_tab = GeneralTab(self, self.settings_manager, self.translation_manager)
+        self.api_keys_tab = ApiKeysTab(self, self.settings_manager, self.translation_manager)
+        self.language_tab = LanguageTab(self, self.settings_manager, self.translation_manager)
         
-        # Add app logo/icon
-        icon_label = QLabel()
-        icon_pixmap = self.create_app_icon().pixmap(QSize(128, 128))
-        icon_label.setPixmap(icon_pixmap)
-        icon_label.setAlignment(Qt.AlignCenter)
-        layout.addWidget(icon_label)
-        
-        # Title label
-        title_label = QLabel("Khmer Speech-to-Text")
-        title_label.setAlignment(Qt.AlignCenter)
-        title_label.setStyleSheet("font-size: 18px; font-weight: bold;")
-        layout.addWidget(title_label)
-        
-        # Description label
-        description_label = QLabel(
-            "Press and HOLD the configured shortcut while speaking, then RELEASE when done to transcribe. "
-            "The audio will be transcribed and inserted at the cursor position.\n\n"
-            "NOTE: You need to add API keys in the API Keys tab for at least one of the transcription models.\n\n"
-            "• Gemini Flash is generally faster (1500 free requests per day).\n"
-            "• ElevenLabs provides better Khmer language accuracy (2.5 hours free audio per month).\n"
-            "The optimal choice may vary depending on your language."
-        )
-        description_label.setAlignment(Qt.AlignCenter)
-        description_label.setWordWrap(True)
-        layout.addWidget(description_label)
-        
-        # Shortcut label
-        self.shortcut_label = QLabel("Current shortcut: loading...")
-        self.shortcut_label.setAlignment(Qt.AlignCenter)
-        self.shortcut_label.setStyleSheet("font-weight: bold;")
-        layout.addWidget(self.shortcut_label)
-        
-        # Status area
-        status_group = QGroupBox("Current Status")
-        status_layout = QVBoxLayout()
-        
-        # Status labels
-        self.status_label = QLabel("Idle")
-        self.status_label.setAlignment(Qt.AlignCenter)
-        status_layout.addWidget(self.status_label)
-        
-        status_group.setLayout(status_layout)
-        layout.addWidget(status_group)
-        
-        # Spacer
-        layout.addStretch()
-        
-        self.overview_tab.setLayout(layout)
-    
-    def create_general_tab(self):
-        """Create the general settings tab"""
-        self.general_tab = QWidget()
-        layout = QVBoxLayout()
-        
-        # Shortcut group
-        shortcut_group = QGroupBox("Shortcut")
-        shortcut_layout = QFormLayout()
-        
-        # Shortcut input using the custom recorder widget
-        self.shortcut_input = ShortcutRecorder()
-        self.shortcut_input.setPlaceholderText("Click here and press keys to record shortcut")
-        shortcut_layout.addRow("Recording shortcut:", self.shortcut_input)
-        
-        # Connect the shortcut recorder's change signal
-        self.shortcut_input.shortcutChanged.connect(self.on_shortcut_changed)
-        
-        # Set the layout for the shortcut group
-        shortcut_group.setLayout(shortcut_layout)
-        
-        # Transcription model group
-        model_group = QGroupBox("Transcription Model")
-        model_layout = QFormLayout()
-        
-        # Model selection
-        self.model_combo = QComboBox()
-        self.model_combo.addItem("Gemini Flash", "gemini_flash")
-        self.model_combo.addItem("ElevenLabs", "elevenlabs")
-        model_layout.addRow("Default model:", self.model_combo)
-        
-        # Set the layout for the model group
-        model_group.setLayout(model_layout)
-        
-        # Appearance group
-        appearance_group = QGroupBox("Appearance")
-        appearance_layout = QFormLayout()
-        
-        # Show overlay checkbox
-        self.show_overlay_checkbox = QCheckBox("Show overlay during recording and transcription")
-        appearance_layout.addRow("", self.show_overlay_checkbox)
-        
-        # Overlay position
-        self.overlay_position_combo = QComboBox()
-        self.overlay_position_combo.addItem("Bottom", "bottom")
-        self.overlay_position_combo.addItem("Top", "top")
-        appearance_layout.addRow("Overlay position:", self.overlay_position_combo)
-        
-        # Set the layout for the appearance group
-        appearance_group.setLayout(appearance_layout)
-        
-        # Startup group
-        startup_group = QGroupBox("Startup")
-        startup_layout = QFormLayout()
-        
-        # Run on startup checkbox
-        self.run_on_startup_checkbox = QCheckBox("Run on Windows startup")
-        startup_layout.addRow("", self.run_on_startup_checkbox)
-        
-        # Set the layout for the startup group
-        startup_group.setLayout(startup_layout)
-        
-        # Add all groups to the tab layout
-        layout.addWidget(shortcut_group)
-        layout.addWidget(model_group)
-        layout.addWidget(appearance_group)
-        layout.addWidget(startup_group)
-        layout.addStretch()
-        
-        # Set the layout for the tab
-        self.general_tab.setLayout(layout)
-    
-    def create_api_keys_tab(self):
-        """Create the API keys tab"""
-        self.api_keys_tab = QWidget()
-        layout = QVBoxLayout()
-        
-        # Google API key group
-        google_group = QGroupBox("Google API Key")
-        google_layout = QFormLayout()
-        
-        # Google API key input
-        self.google_api_key_input = QLineEdit()
-        self.google_api_key_input.setEchoMode(QLineEdit.Password)
-        self.google_api_key_input.setPlaceholderText("Enter your Google API key")
-        google_layout.addRow("Google API Key:", self.google_api_key_input)
-        
-        # Add link to get API key
-        google_link_label = QLabel("<a href='https://aistudio.google.com/'>Get API key here</a>")
-        google_link_label.setOpenExternalLinks(True)
-        google_layout.addRow("", google_link_label)
-        
-        # Set the layout for the Google group
-        google_group.setLayout(google_layout)
-        
-        # ElevenLabs API key group
-        elevenlabs_group = QGroupBox("ElevenLabs API Key")
-        elevenlabs_layout = QFormLayout()
-        
-        # ElevenLabs API key input
-        self.elevenlabs_api_key_input = QLineEdit()
-        self.elevenlabs_api_key_input.setEchoMode(QLineEdit.Password)
-        self.elevenlabs_api_key_input.setPlaceholderText("Enter your ElevenLabs API key")
-        elevenlabs_layout.addRow("ElevenLabs API Key:", self.elevenlabs_api_key_input)
-        
-        # Add link to get API key
-        elevenlabs_link_label = QLabel("<a href='https://elevenlabs.io/app/settings/api-keys'>Get API key here</a>")
-        elevenlabs_link_label.setOpenExternalLinks(True)
-        elevenlabs_layout.addRow("", elevenlabs_link_label)
-        
-        # Set the layout for the ElevenLabs group
-        elevenlabs_group.setLayout(elevenlabs_layout)
-        
-        # Add all groups to the tab layout
-        layout.addWidget(google_group)
-        layout.addWidget(elevenlabs_group)
-        layout.addStretch()
-        
-        # Note about API keys
-        note_label = QLabel(
-            "API keys are stored securely using Windows Credentials Manager. "
-            "They are not stored in plain text."
-        )
-        note_label.setWordWrap(True)
-        note_label.setStyleSheet("color: gray; font-style: italic;")
-        layout.addWidget(note_label)
-        
-        # Set the layout for the tab
-        self.api_keys_tab.setLayout(layout)
-    
-    def create_language_tab(self):
-        """Create the language tab"""
-        self.language_tab = QWidget()
-        layout = QVBoxLayout()
-        
-        # Language selection group
-        language_group = QGroupBox("Language")
-        language_layout = QFormLayout()
-        
-        # Language combo box
-        self.language_combo = QComboBox()
-        # Get available languages from settings manager
-        languages = self.settings_manager.get_available_languages()
-        for name, code in languages.items():
-            self.language_combo.addItem(name, code)
-        language_layout.addRow("Transcription language:", self.language_combo)
-        
-        # Set the layout for the language group
-        language_group.setLayout(language_layout)
-        
-        # Text insertion group
-        insertion_group = QGroupBox("Text Insertion")
-        insertion_layout = QFormLayout()
-        
-        # Insertion method
-        self.clipboard_radio = QRadioButton("Via clipboard (recommended)")
-        self.keypress_radio = QRadioButton("Via simulated keypresses")
-        
-        # Add radio buttons to a button group
-        self.insertion_method_group = QButtonGroup()
-        self.insertion_method_group.addButton(self.clipboard_radio, 0)
-        self.insertion_method_group.addButton(self.keypress_radio, 1)
-        
-        insertion_layout.addRow("Insert text:", self.clipboard_radio)
-        insertion_layout.addRow("", self.keypress_radio)
-        
-        # Set the layout for the insertion group
-        insertion_group.setLayout(insertion_layout)
-        
-        # Add all groups to the tab layout
-        layout.addWidget(language_group)
-        layout.addWidget(insertion_group)
-        layout.addStretch()
-        
-        # Set the layout for the tab
-        self.language_tab.setLayout(layout)
+        # Add tabs
+        self.tabs.addTab(self.overview_tab, self.translation_manager.get_string("tabs.overview"))
+        self.tabs.addTab(self.general_tab, self.translation_manager.get_string("tabs.general"))
+        self.tabs.addTab(self.api_keys_tab, self.translation_manager.get_string("tabs.api_keys"))
+        self.tabs.addTab(self.language_tab, self.translation_manager.get_string("tabs.language"))
     
     def load_settings(self):
         """Load current settings into the UI"""
-        # General tab
+        # Update shortcut label in overview tab
         shortcut = self.settings_manager.get_setting("shortcut")
-        self.shortcut_input.set_shortcut(shortcut)
+        self.overview_tab.update_shortcut_label(shortcut)
         
-        # Update shortcut label now that shortcut_input exists
-        self.update_shortcut_label()
+        # Update language selector
+        language = self.settings_manager.get_setting("ui_language")
+        self.language_selector.set_language(language)
         
-        # Model selection
-        model = self.settings_manager.get_setting("transcription_model", "gemini_flash")
-        index = self.model_combo.findData(model)
-        if index >= 0:
-            self.model_combo.setCurrentIndex(index)
-        
-        # Appearance
-        show_overlay = self.settings_manager.get_setting("show_overlay", True)
-        self.show_overlay_checkbox.setChecked(show_overlay)
-        
-        overlay_position = self.settings_manager.get_setting("overlay_position", "bottom")
-        index = self.overlay_position_combo.findData(overlay_position)
-        if index >= 0:
-            self.overlay_position_combo.setCurrentIndex(index)
-        
-        # Startup
-        run_on_startup = self.settings_manager.get_setting("run_on_startup", True)
-        self.run_on_startup_checkbox.setChecked(run_on_startup)
-        
-        # API keys tab
-        google_api_key = self.settings_manager.get_api_key("google") or ""
-        self.google_api_key_input.setText(google_api_key)
-        
-        elevenlabs_api_key = self.settings_manager.get_api_key("elevenlabs") or ""
-        self.elevenlabs_api_key_input.setText(elevenlabs_api_key)
-        
-        # Language tab
-        language_code = self.settings_manager.get_setting("language", "khm")
-        index = self.language_combo.findData(language_code)
-        if index >= 0:
-            self.language_combo.setCurrentIndex(index)
-        
-        # Insertion method
-        insertion_method = self.settings_manager.get_setting("insertion_method", "clipboard")
-        if insertion_method == "clipboard":
-            self.clipboard_radio.setChecked(True)
-        else:
-            self.keypress_radio.setChecked(True)
-    
-    def save_settings(self):
-        """Save settings from the UI"""
-        try:
-            # Store current API keys to detect changes
-            old_google_api_key = self.settings_manager.get_api_key("google") or ""
-            old_elevenlabs_api_key = self.settings_manager.get_api_key("elevenlabs") or ""
-
-            # General tab
-            shortcut = self.shortcut_input.get_shortcut()
-            self.settings_manager.set_setting("shortcut", shortcut)
-            
-            model = self.model_combo.currentData()
-            self.settings_manager.set_setting("transcription_model", model)
-            
-            show_overlay = self.show_overlay_checkbox.isChecked()
-            self.settings_manager.set_setting("show_overlay", show_overlay)
-            
-            overlay_position = self.overlay_position_combo.currentData()
-            self.settings_manager.set_setting("overlay_position", overlay_position)
-            
-            run_on_startup = self.run_on_startup_checkbox.isChecked()
-            self.settings_manager.set_setting("run_on_startup", run_on_startup)
-            
-            # API keys tab
-            api_keys_changed = False
-            
-            google_api_key = self.google_api_key_input.text()
-            if google_api_key:
-                if google_api_key != old_google_api_key:
-                    api_keys_changed = True
-                self.settings_manager.set_api_key("google", google_api_key)
-            
-            elevenlabs_api_key = self.elevenlabs_api_key_input.text()
-            if elevenlabs_api_key:
-                if elevenlabs_api_key != old_elevenlabs_api_key:
-                    api_keys_changed = True
-                self.settings_manager.set_api_key("elevenlabs", elevenlabs_api_key)
-            
-            # Language tab
-            language_code = self.language_combo.currentData()
-            old_language_code = self.settings_manager.get_setting("language", "khm")
-            language_changed = language_code != old_language_code
-            self.settings_manager.set_setting("language", language_code)
-            
-            # Insertion method
-            insertion_method = "clipboard" if self.clipboard_radio.isChecked() else "keypress"
-            self.settings_manager.set_setting("insertion_method", insertion_method)
-            
-            # Explicitly save all settings to persistent storage
-            self.settings_manager.save()
-            
-            # Update UI elements that depend on settings
-            self.update_shortcut_label()
-            
-            # Update keyboard listener shortcut if changed
-            new_shortcut = self.shortcut_input.get_shortcut()
-            if hasattr(self, 'keyboard_thread') and self.keyboard_thread:
-                self.keyboard_thread.update_shortcut(new_shortcut)
-            
-            # Refresh transcription models if API keys or language changed
-            if api_keys_changed or language_changed:
-                available_models = self.transcription_manager.refresh_models()
-                logger.info(f"Refreshed transcription models after API key change: {available_models}")
-                self.status_label.setText("Transcription models refreshed")
-                
-                # Show notification
-                self.tray_icon.showMessage(
-                    "Settings Saved",
-                    "Your settings have been saved and transcription models refreshed.",
-                    QSystemTrayIcon.Information,
-                    3000
-                )
-            else:
-                # Regular notification
-                self.tray_icon.showMessage(
-                    "Settings Saved",
-                    "Your settings have been saved successfully.",
-                    QSystemTrayIcon.Information,
-                    3000
-                )
-            
-            # No confirmation dialog, just minimize to tray
-            self.hide()
-            
-        except Exception as e:
-            logger.error(f"Error saving settings: {str(e)}")
-            QMessageBox.critical(self, "Error", f"Error saving settings: {str(e)}")
-    
-    def create_app_icon(self):
-        """
-        Create application icon
-        First tries to load from file, falls back to generated icon if file not found
-        """
-        # Try to load from file
-        icon_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "resources", "icon.png")
-        if os.path.exists(icon_path):
-            return QIcon(icon_path)
-        
-        # Create custom icon if file not found
-        size = 64
-        pixmap = QPixmap(size, size)
-        pixmap.fill(Qt.transparent)
-        
-        # Create painter
-        painter = QPainter(pixmap)
-        painter.setRenderHint(QPainter.Antialiasing)
-        
-        # Set up colors
-        mic_color = QColor(52, 152, 219)  # Blue
-        circle_color = QColor(236, 240, 241, 160)  # Light gray with transparency
-        
-        # Draw background circle
-        painter.setBrush(circle_color)
-        painter.setPen(Qt.NoPen)
-        painter.drawEllipse(4, 4, size-8, size-8)
-        
-        # Draw microphone icon
-        mic_rect = QRect(size//3, size//5, size//3, size//2)
-        painter.setBrush(mic_color)
-        painter.setPen(Qt.NoPen)
-        painter.drawRoundedRect(mic_rect, 8, 8)
-        
-        # Draw microphone base stand
-        base_width = size//2
-        base_height = size//15
-        base_x = (size - base_width) // 2
-        base_y = mic_rect.bottom() + size//10
-        painter.drawRoundedRect(base_x, base_y, base_width, base_height, 4, 4)
-        
-        # Draw connection line
-        line_width = size//25
-        line_height = size//10
-        line_x = (size - line_width) // 2
-        line_y = mic_rect.bottom()
-        painter.drawRoundedRect(line_x, line_y, line_width, line_height, 2, 2)
-        
-        # End painting
-        painter.end()
-        
-        # Create icon from pixmap
-        return QIcon(pixmap)
+        # No need to load settings for each tab as they already load their settings in their constructors
     
     def setup_tray(self):
         """Set up the system tray icon"""
-        # Create the tray icon with the same icon as the application
-        self.tray_icon = QSystemTrayIcon(self.create_app_icon(), self)
-        self.tray_icon.setToolTip("Khmer STT - Voice to Text")
-        
-        # Create tray menu
-        tray_menu = QMenu()
-        
-        # Open action - we're not adding this as the click behavior will open the app
-        # Instead, show this in the menu for clarity
-        open_action = QAction("Open", self)
-        open_action.triggered.connect(self.show_main_window)
-        tray_menu.addAction(open_action)
-        
-        # Separator
-        tray_menu.addSeparator()
-        
-        # Exit action
-        exit_action = QAction("Exit", self)
-        exit_action.triggered.connect(self.close_application)
-        tray_menu.addAction(exit_action)
-        
-        # Set the tray menu
-        self.tray_icon.setContextMenu(tray_menu)
-        
-        # Show the tray icon
-        self.tray_icon.show()
-        
-        # Connect tray icon activation - changed to use clicked instead of DoubleClick
-        self.tray_icon.activated.connect(self.tray_icon_activated)
-        
+        # Create TrayManager with the app icon
+        self.tray_manager = TrayManager(self, self.windowIcon(), self.translation_manager)
+    
     def connect_signals(self):
         """Connect signals to slots"""
         # Connect transcription signals
         self.transcription_manager.transcription_started.connect(self.on_transcription_started)
         self.transcription_manager.transcription_completed.connect(self.on_transcription_completed)
         self.transcription_manager.transcription_error.connect(self.on_transcription_error)
-        
-    def on_tab_changed(self, index):
-        """Handle tab changed event"""
-        # We don't need to reload settings when changing tabs as it overwrites unsaved changes
-        pass
     
     def update_shortcut_label(self):
         """Update the shortcut label in the overview tab"""
-        # Check if shortcut_input exists yet
-        if hasattr(self, 'shortcut_input') and self.shortcut_input:
-            shortcut = self.shortcut_input.text() 
-        else:
-            # Fallback if shortcut_input isn't created yet
-            shortcut = self.settings_manager.get_setting("shortcut", "Ctrl + Alt + Space")
-            
-        # Format for display if it's in the internal format
-        if '+' in shortcut and ' ' not in shortcut:
-            parts = shortcut.split('+')
-            formatted_parts = [p.capitalize() for p in parts]
-            shortcut = " + ".join(formatted_parts)
-            
-        self.shortcut_label.setText(f"Current shortcut: {shortcut}")
+        shortcut = self.settings_manager.get_setting("shortcut")
+        self.overview_tab.update_shortcut_label(shortcut)
     
     def show_main_window(self):
         """Show the main window and bring it to the front"""
@@ -647,12 +345,11 @@ class MainWindow(QMainWindow):
     def closeEvent(self, event):
         """Handle window close event"""
         # Minimize to tray instead of closing
-        if self.tray_icon.isVisible():
+        if self.tray_manager.is_visible():
             QMessageBox.information(
-                self, "Khmer STT",
-                "The application will keep running in the system tray. "
-                "To terminate the program, choose 'Exit' in the context menu "
-                "of the system tray icon."
+                self, 
+                self.translation_manager.get_string("app_name"),
+                self.translation_manager.get_string("notifications.keep_running_notice_quit_button")
             )
             self.hide()
             event.ignore()
@@ -665,19 +362,11 @@ class MainWindow(QMainWindow):
         self.recorder.close()
         
         # Hide the tray icon
-        self.tray_icon.hide()
+        self.tray_manager.hide()
         
         # Quit the application
         QTimer.singleShot(0, self.close)
         QTimer.singleShot(100, lambda: sys.exit(0))
-    
-    def tray_icon_activated(self, reason):
-        """
-        Handle tray icon activation
-        Now responds to single clicks instead of requiring double-clicks
-        """
-        if reason == QSystemTrayIcon.Trigger:  # Single click
-            self.show_main_window()
     
     @pyqtSlot()
     def start_recording(self):
@@ -690,20 +379,36 @@ class MainWindow(QMainWindow):
         self.recording = True
         
         # Update status in UI
-        self.status_label.setText("Recording...")
-        self.status_label.setStyleSheet("color: #e74c3c; font-weight: bold;")
+        self.overview_tab.set_status("status.recording")
         
-        # Update overlay first to give immediate visual feedback
-        if self.settings_manager.get_setting("show_overlay", True):
-            self.overlay.set_state("recording")
+        # Get overlay setting
+        show_overlay = self.settings_manager.get_setting("show_overlay")
+        overlay_position = self.settings_manager.get_setting("overlay_position")
+        
+        if show_overlay:
+            # Show overlay before recording
+            self.overlay.set_recording_state()
+            # Position the overlay before showing it - no need to pass position to show()
+            self.overlay.position_at_bottom()
+            self.overlay.show()
             
-        # Start recording in a very short timer to prevent UI blocking
-        QTimer.singleShot(10, self._start_recording_impl)
+            # Delayed start of recording to ensure overlay is visible
+            QTimer.singleShot(100, self._start_recording_impl)
+        else:
+            # Start recording immediately
+            self._start_recording_impl()
     
     def _start_recording_impl(self):
         """Actual recording implementation - called after overlay is shown"""
-        # Start the actual recording
-        self.recorder.start_recording()
+        try:
+            # Start recording
+            self.recorder.start_recording()
+            logger.info("Recording started")
+        except Exception as e:
+            logger.error(f"Error starting recording: {e}")
+            self.recording = False
+            self.overview_tab.set_status("status.error", error_state=True)
+            self.overlay.hide()
     
     @pyqtSlot()
     def stop_recording(self):
@@ -713,45 +418,40 @@ class MainWindow(QMainWindow):
             return
         
         logger.info("Stopping recording")
-        self.recording = False
         
-        # Update status in UI
-        self.status_label.setText("Processing recording...")
-        self.status_label.setStyleSheet("color: #3498db; font-weight: bold;")
-        
-        # Stop recording and get the audio file
-        audio_file = self.recorder.stop_recording()
-        
-        if audio_file:
-            logger.info(f"Recording saved to {audio_file}")
+        try:
+            # Stop recording
+            audio_file = self.recorder.stop_recording()
+            self.recording = False
             
-            # Start transcription
-            model_name = self.settings_manager.get_setting("transcription_model", "gemini_flash")
-            self.transcription_manager.transcribe(audio_file, model_name)
-        else:
-            logger.error("Failed to save recording")
-            
-            # Update UI
-            self.status_label.setText("Failed to save recording")
-            self.status_label.setStyleSheet("color: red; font-weight: bold;")
+            # Update status
+            self.overview_tab.set_status("status.transcribing")
             
             # Update overlay
-            if self.settings_manager.get_setting("show_overlay", True):
-                self.overlay.set_state("idle")
+            self.overlay.set_transcribing_state()
+            
+            # Start transcription
+            default_model = self.settings_manager.get_setting("default_model")
+            language = self.settings_manager.get_setting("language")
+            
+            logger.info(f"Starting transcription with model: {default_model}, language: {language}")
+            # Update the language setting before transcription
+            self.settings_manager.set_setting("language", language)
+            # Call transcribe with the correct number of arguments
+            self.transcription_manager.transcribe(audio_file, default_model)
+            
+        except Exception as e:
+            logger.error(f"Error stopping recording: {e}")
+            self.recording = False
+            self.overview_tab.set_status("status.error", error_state=True)
+            self.overlay.hide()
     
     @pyqtSlot()
     def on_transcription_started(self):
         """Handle transcription started"""
         logger.info("Transcription started")
         self.transcribing = True
-        
-        # Update status in UI
-        self.status_label.setText("Transcribing...")
-        self.status_label.setStyleSheet("color: #3498db; font-weight: bold;")
-        
-        # Update overlay
-        if self.settings_manager.get_setting("show_overlay", True):
-            self.overlay.set_state("transcribing")
+        self.overview_tab.set_status("status.transcribing")
     
     @pyqtSlot(str)
     def on_transcription_completed(self, text):
@@ -761,34 +461,27 @@ class MainWindow(QMainWindow):
         Args:
             text: Transcribed text
         """
-        logger.info("Transcription completed")
+        logger.info(f"Transcription completed: {text}")
         self.transcribing = False
         
-        # Update status in UI
-        self.status_label.setText("Idle")
-        self.status_label.setStyleSheet("")
+        # Hide the overlay
+        self.overlay.hide()
         
-        # Update overlay
-        if self.settings_manager.get_setting("show_overlay", True):
-            self.overlay.set_state("idle")
-        
-        if text:
-            logger.info(f"Transcription result: {text}")
-            
-            # Insert the text
-            insertion_method = self.settings_manager.get_setting("insertion_method", "clipboard")
-            self.text_inserter.insert_text_async(text, insertion_method)
-            
-        else:
-            logger.warning("Empty transcription result")
-            
-            # Show notification
-            self.tray_icon.showMessage(
-                "Transcription Failed",
-                "The transcription result was empty.",
-                QSystemTrayIcon.Warning,
-                3000
+        # Set the transcribed text using the configured method
+        insertion_method = self.settings_manager.get_setting("insertion_method")
+        try:
+            self.text_inserter.insert_text(text, method=insertion_method)
+            logger.info(f"Text inserted using {insertion_method} method")
+        except Exception as e:
+            logger.error(f"Error inserting text: {e}")
+            self.tray_manager.showMessage(
+                self.translation_manager.get_string("notifications.error_title"),
+                self.translation_manager.get_string("notifications.insert_error", error=str(e)),
+                timeout=3000
             )
+        
+        # Update status
+        self.overview_tab.set_status("status.idle")
     
     @pyqtSlot(str)
     def on_transcription_error(self, error):
@@ -801,27 +494,74 @@ class MainWindow(QMainWindow):
         logger.error(f"Transcription error: {error}")
         self.transcribing = False
         
-        # Update status in UI
-        self.status_label.setText("Error during transcription")
-        self.status_label.setStyleSheet("color: red; font-weight: bold;")
+        # Show error in overlay
+        self.overlay.set_error_state()
         
-        # Update overlay
-        if self.settings_manager.get_setting("show_overlay", True):
-            self.overlay.set_state("idle")
+        # Hide overlay after a delay
+        QTimer.singleShot(3000, self.overlay.hide)
+        
+        # Update status
+        self.overview_tab.set_status("status.error", error_state=True)
         
         # Show notification
-        self.tray_icon.showMessage(
-            "Transcription Error",
-            f"Error during transcription: {error}",
-            QSystemTrayIcon.Critical,
-            3000
+        self.tray_manager.showMessage(
+            self.translation_manager.get_string("notifications.transcription_error_title"),
+            self.translation_manager.get_string("notifications.transcription_error", error=error),
+            timeout=5000
         )
     
-    def on_shortcut_changed(self, shortcut):
-        """Handle shortcut changes from the recorder widget"""
-        logger.info(f"Shortcut changed to: {shortcut}")
-        self.update_shortcut_label()
-        
-        # Update keyboard listener shortcut immediately (don't wait for save)
+    def update_global_shortcut(self, shortcut):
+        """Update the global shortcut listener"""
+        # This would update the keyboard listener thread
         if hasattr(self, 'keyboard_thread') and self.keyboard_thread:
             self.keyboard_thread.update_shortcut(shortcut)
+        
+        # Update shortcut display in overview tab
+        self.update_shortcut_label()
+    
+    def update_startup_registry(self, run_on_startup):
+        """Update the startup registry"""
+        # Implementation depends on system (Windows registry, Linux autostart, etc.)
+        logger.info(f"Setting run on startup: {run_on_startup}")
+        # Actual implementation would be platform-specific
+    
+    def change_language(self, language_code):
+        """Change the UI language"""
+        logger.info(f"Changing UI language to: {language_code}")
+        
+        # Set the language in the translation manager
+        self.translation_manager.set_language(language_code)
+        
+        # Save the language setting
+        self.settings_manager.set_setting("ui_language", language_code)
+        
+        # Update all UI elements
+        self.update_ui_language()
+    
+    def update_ui_language(self):
+        """Update all UI text after language change"""
+        # Update window title
+        self.setWindowTitle(self.translation_manager.get_string("window_title"))
+        
+        # Update button texts
+        self.quit_button.setText(self.translation_manager.get_string("buttons.quit"))
+        self.hide_button.setText(self.translation_manager.get_string("buttons.hide_window"))
+        
+        # Update tab titles
+        self.tabs.setTabText(0, self.translation_manager.get_string("tabs.overview"))
+        self.tabs.setTabText(1, self.translation_manager.get_string("tabs.general"))
+        self.tabs.setTabText(2, self.translation_manager.get_string("tabs.api_keys"))
+        self.tabs.setTabText(3, self.translation_manager.get_string("tabs.language"))
+        
+        # Update language selector
+        self.language_selector.update_language()
+        
+        # Update each tab
+        self.overview_tab.update_language()
+        self.general_tab.update_language()
+        self.api_keys_tab.update_language()
+        self.language_tab.update_language()
+        
+        # Update tray menu
+        self.tray_manager.update_menu_text()
+        self.tray_manager.update_tooltip()
