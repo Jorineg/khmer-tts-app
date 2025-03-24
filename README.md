@@ -24,7 +24,7 @@ A Windows application that allows recording audio with a global shortcut and tra
 ### For End Users
 
 1. Download the installer from the releases page or request it from the developer.
-2. Run the `KhmerSTTSetup.exe` installer.
+2. Run the `KhmerSSTTetup.exe` installer.
 3. Follow the on-screen instructions to complete the installation.
 4. Optionally, enable the "Start automatically with Windows" option during installation.
 5. Launch the application from the Start menu or desktop shortcut.
@@ -101,7 +101,7 @@ To build the Windows installer:
    ```
    build_installer.bat
    ```
-   This will create an installer at `output/KhmerSTTSetup.exe`.
+   This will create an installer at `output/KhmerSSTTetup.exe`.
 
 ## Usage
 

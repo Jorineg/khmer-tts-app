@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Constants
-API_KEY_SERVICE = "KhmerTTSApp"
+API_KEY_SERVICE = "KhmerSTTApp"
 
 # API Keys
 ASSEMBLYAI_API_KEY = None

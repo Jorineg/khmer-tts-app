@@ -53,7 +53,7 @@ def main():
         
         # Create application
         app = QApplication(sys.argv)
-        app.setApplicationName("Khmer TTS")
+        app.setApplicationName("Khmer STT")
         app.setQuitOnLastWindowClosed(False)  # Keep running when window is closed
         
         # Initialize settings manager

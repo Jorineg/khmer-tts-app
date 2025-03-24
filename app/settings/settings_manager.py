@@ -14,9 +14,9 @@ import keyring.errors
 logger = logging.getLogger(__name__)
 
 # Constants
-APP_NAME = "KhmerTTS"
+APP_NAME = "KhmerSTT"
 SETTINGS_FILE = "settings.json"
-API_KEY_SERVICE = "KhmerTTSApp"
+API_KEY_SERVICE = "KhmerSTTApp"
 
 class SettingsManager:
     """

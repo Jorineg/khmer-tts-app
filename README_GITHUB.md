@@ -1,4 +1,4 @@
-# Khmer TTS Application
+# Khmer STT Application
 
 A standalone Windows 11 application for voice recording and transcription with a global keyboard shortcut. Specializing in Khmer language support, but works with multiple languages.
 
@@ -18,12 +18,12 @@ A standalone Windows 11 application for voice recording and transcription with a
 
 ## Installation
 
-You can install Khmer TTS in two ways:
+You can install Khmer STT in two ways:
 
 ### Download the Installer
 
 1. Go to the [Releases](../../releases) page
-2. Download the latest `KhmerTTS_Setup.exe`
+2. Download the latest `KhmerSTT_Setup.exe`
 3. Run the installer and follow the instructions
 
 ### Build from Source
