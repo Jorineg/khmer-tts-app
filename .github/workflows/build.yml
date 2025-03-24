@@ -1,11 +1,23 @@
-name: Build Khmer TTS Application
+name: Build Khmer STT Application
 
 on:
   push:
     branches: [ main ]
+    tags:
+      - 'v*' # Will trigger on version tags like v1.0.0
   pull_request:
     branches: [ main ]
   workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'Release type'
+        required: true
+        default: 'test'
+        type: choice
+        options:
+          - test
+          - beta
+          - release
 
 jobs:
   build-windows:
@@ -24,36 +36,13 @@ jobs:
         pip install -r requirements.txt
         pip install pyinstaller pillow
         
-    - name: Create resources directory
+    - name: Create resources directory and icon
       run: |
-        mkdir -Force resources
-        
-    - name: Create icon
-      run: |
-        $iconScript = @"
-        from PIL import Image, ImageDraw
-
-        # Create a blank image with blue background
-        size = (256, 256)
-        img = Image.new("RGBA", size, color=(65, 105, 225, 255))
-        draw = ImageDraw.Draw(img)
-
-        # Draw a simple white K
-        thickness = 30
-        draw.line([(80, 80), (80, 176)], fill=(255, 255, 255, 255), width=thickness)
-        draw.line([(80, 128), (130, 80)], fill=(255, 255, 255, 255), width=thickness)
-        draw.line([(80, 128), (130, 176)], fill=(255, 255, 255, 255), width=thickness)
-
-        # Save both formats
-        img.save("resources/icon.png")
-        img.save("resources/icon.ico", format="ICO", sizes=[(256, 256), (128, 128), (64, 64), (32, 32), (16, 16)])
-        "@
-        Set-Content -Path "make_icon.py" -Value $iconScript
-        python make_icon.py
+        python create_icon.py
       
     - name: Build with PyInstaller
       run: |
-        pyinstaller --clean --icon=resources/icon.ico --add-data="resources;resources" --hidden-import=keyring.backends.Windows --hidden-import=pynput.keyboard._win32 --hidden-import=pynput.mouse._win32 --hidden-import=google.generativeai --hidden-import=elevenlabs --collect-all=pynput --collect-all=elevenlabs --collect-all=pyaudio --collect-all=keyring --collect-all=google.generativeai --onefile --noconsole --name="Khmer TTS" main.py
+        pyinstaller --clean --icon=resources/icon.ico --add-data="resources;resources" --hidden-import=keyring.backends.Windows --hidden-import=pynput.keyboard._win32 --hidden-import=pynput.mouse._win32 --hidden-import=google.generativeai --hidden-import=elevenlabs --collect-all=pynput --collect-all=elevenlabs --collect-all=pyaudio --collect-all=keyring --collect-all=google.generativeai --onefile --noconsole --name="Khmer STT" main.py
         
     # Fix for tzdata missing warning
     - name: Add missing imports
@@ -65,7 +54,7 @@ jobs:
       run: |
         $installScript = @"
         @echo off
-        echo Installing Khmer TTS...
+        echo Installing Khmer Speech-to-Text...
 
         :: Check for administrator privileges
         net session >nul 2>&1
@@ -76,30 +65,79 @@ jobs:
             exit /b 1
         )
         
-        set INSTALL_DIR=%PROGRAMFILES%\Khmer TTS
+        :: Set installation directory
+        set INSTALL_DIR=%PROGRAMFILES%\KhmerSTT
         
-        if not exist "%INSTALL_DIR%" mkdir "%INSTALL_DIR%"
+        echo Installation directory: %INSTALL_DIR%
+        
+        :: Create installation directory if it doesn't exist
+        if not exist "%INSTALL_DIR%" (
+            echo Creating installation directory...
+            mkdir "%INSTALL_DIR%"
+        )
         
         echo Copying files...
-        copy /Y "Khmer TTS.exe" "%INSTALL_DIR%\"
-        copy /Y "LICENSE.txt" "%INSTALL_DIR%\"
+        copy /Y "Khmer STT.exe" "%INSTALL_DIR%\Khmer STT.exe"
+        copy /Y "LICENSE.txt" "%INSTALL_DIR%\LICENSE.txt"
+        
+        :: Create application metadata to hide .exe extension in task manager
+        echo Creating application metadata...
+        echo [.ShellClassInfo] > "%INSTALL_DIR%\desktop.ini"
+        echo ConfirmFileOp=0 >> "%INSTALL_DIR%\desktop.ini"
+        echo NoSharing=1 >> "%INSTALL_DIR%\desktop.ini"
+        echo IconResource=Khmer STT.exe,0 >> "%INSTALL_DIR%\desktop.ini"
+        echo [ViewState] >> "%INSTALL_DIR%\desktop.ini"
+        echo Mode= >> "%INSTALL_DIR%\desktop.ini"
+        echo Vid= >> "%INSTALL_DIR%\desktop.ini"
+        echo FolderType=Generic >> "%INSTALL_DIR%\desktop.ini"
+        attrib +s +h "%INSTALL_DIR%\desktop.ini"
+        attrib +s "%INSTALL_DIR%"
         
         echo Creating shortcuts...
-        powershell -Command "$WshShell = New-Object -ComObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut('%USERPROFILE%\Desktop\Khmer TTS.lnk'); $Shortcut.TargetPath = '%INSTALL_DIR%\Khmer TTS.exe'; $Shortcut.Save()"
-        powershell -Command "$WshShell = New-Object -ComObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut('%APPDATA%\Microsoft\Windows\Start Menu\Programs\Khmer TTS.lnk'); $Shortcut.TargetPath = '%INSTALL_DIR%\Khmer TTS.exe'; $Shortcut.Save()"
+        powershell -Command "$WshShell = New-Object -ComObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut('%USERPROFILE%\Desktop\Khmer STT.lnk'); $Shortcut.TargetPath = '%INSTALL_DIR%\Khmer STT.exe'; $Shortcut.Description = 'Khmer Speech-to-Text Application'; $Shortcut.Save()"
+        powershell -Command "$WshShell = New-Object -ComObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut('%APPDATA%\Microsoft\Windows\Start Menu\Programs\Khmer STT.lnk'); $Shortcut.TargetPath = '%INSTALL_DIR%\Khmer STT.exe'; $Shortcut.Description = 'Khmer Speech-to-Text Application'; $Shortcut.Save()"
         
+        echo.
         echo Installation complete!
+        echo The application is now installed in: %INSTALL_DIR%
+        echo Shortcuts have been created on your desktop and in the Start Menu.
+        echo.
         pause
         "@
         Set-Content -Path "install.bat" -Value $installScript
         
-        # Create LICENSE.txt for the package
-        $licenseContent = Get-Content -Path "LICENSE.txt" -Raw
+        # Create README.txt for the package
+        $readmeContent = @"
+        Khmer Speech-to-Text Application
+        ================================
+        
+        This application allows you to transcribe Khmer speech to text using 
+        keyboard shortcuts. It can be used in any application where you can 
+        enter text.
+        
+        Installation:
+        1. Right-click on install.bat and select "Run as administrator"
+        2. Follow the prompts to complete the installation
+        
+        Usage:
+        - Press and hold Ctrl+Alt+Space (default shortcut) to record audio
+        - Release to transcribe the audio to text
+        - Access settings through the system tray icon
+        
+        The application will start automatically with Windows by default.
+        You can change this and other settings in the application.
+        
+        For more information, visit the project repository.
+        "@
+        Set-Content -Path "README.txt" -Value $readmeContent -Encoding UTF8
+        
+        # Create LICENSE.txt for the package if it doesn't exist
+        $licenseContent = Get-Content -Path "LICENSE.txt" -Raw -ErrorAction SilentlyContinue
         if (-not $licenseContent) {
             $licenseContent = @"
         MIT License
 
-        Copyright (c) 2025 Khmer TTS Team
+        Copyright (c) 2025 Khmer STT Team
 
         Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
@@ -110,17 +148,77 @@ jobs:
             Set-Content -Path "LICENSE.txt" -Value $licenseContent
         }
         
-        # Package as a simple zip file
-        Compress-Archive -Path "dist\Khmer TTS.exe", "LICENSE.txt", "install.bat" -DestinationPath "KhmerTTS_Package.zip" -Force
+        # Package files individually (not in a zip) to avoid nested zip
+        mkdir -Force release_package
+        copy "dist\Khmer STT.exe" release_package\
+        copy "LICENSE.txt" release_package\
+        copy "README.txt" release_package\
+        copy "install.bat" release_package\
+        
+        # Create a simple zip file
+        Compress-Archive -Path "release_package\*" -DestinationPath "KhmerSTT_Package.zip" -Force
     
+    # Read version from version.txt or use build number for testing
+    - name: Determine version
+      id: get_version
+      run: |
+        # Check if this is a tag-based release
+        if ("${{ github.ref }}" -like "refs/tags/v*") {
+          $version = "${{ github.ref }}".Replace("refs/tags/v", "")
+          echo "version=$version" >> $env:GITHUB_OUTPUT
+          echo "is_release=true" >> $env:GITHUB_OUTPUT
+          echo "release_name=Khmer STT v$version" >> $env:GITHUB_OUTPUT
+          echo "Using tagged version: $version"
+        }
+        # Check if this is a manual workflow dispatch
+        elseif ("${{ github.event_name }}" -eq "workflow_dispatch") {
+          $releaseType = "${{ github.event.inputs.release_type }}"
+          $version = "0.$(Get-Date -Format 'yMMdd').${{ github.run_number }}"
+          
+          if ($releaseType -eq "release") {
+            echo "version=$version" >> $env:GITHUB_OUTPUT
+            echo "is_release=true" >> $env:GITHUB_OUTPUT
+            echo "release_name=Khmer STT v$version" >> $env:GITHUB_OUTPUT
+            echo "Creating release version: $version"
+          }
+          else {
+            echo "version=$version" >> $env:GITHUB_OUTPUT
+            echo "is_release=false" >> $env:GITHUB_OUTPUT
+            echo "release_name=Khmer STT $releaseType build $version" >> $env:GITHUB_OUTPUT
+            echo "Creating $releaseType version: $version"
+          }
+        }
+        # Default case for regular pushes - always create test builds
+        else {
+          $version = "0.$(Get-Date -Format 'yMMdd').${{ github.run_number }}"
+          echo "version=$version" >> $env:GITHUB_OUTPUT
+          echo "is_release=false" >> $env:GITHUB_OUTPUT
+          echo "release_name=Khmer STT Test Build $version" >> $env:GITHUB_OUTPUT
+          echo "Creating test build: $version"
+        }
+        
+    # Create a GitHub release for all builds
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: KhmerSTT_Package.zip
+        name: ${{ steps.get_version.outputs.release_name }}
+        tag_name: build-${{ github.run_number }}
+        prerelease: ${{ steps.get_version.outputs.is_release != 'true' }}
+        draft: false
+        fail_on_unmatched_files: true
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Upload executable
       uses: actions/upload-artifact@v4
       with:
-        name: khmer-tts-exe
-        path: dist/Khmer TTS.exe
+        name: khmer-stt-exe
+        path: dist/Khmer STT.exe
         
     - name: Upload package
       uses: actions/upload-artifact@v4
       with:
-        name: khmer-tts-package
-        path: KhmerTTS_Package.zip
+        name: khmer-stt-package
+        path: KhmerSTT_Package.zip

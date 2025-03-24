@@ -3,6 +3,7 @@ Main application entry point
 """
 
 import sys
+import os
 import logging
 import ctypes
 from PyQt5.QtWidgets import QApplication
@@ -12,13 +13,19 @@ from app.gui.main_window import MainWindow
 from app.system.keyboard_listener import start_keyboard_listener
 from app.settings.settings_manager import SettingsManager
 
+# Determine log file location in user's AppData folder
+app_name = "KhmerSTT"
+app_data_dir = os.path.join(os.environ.get('APPDATA', '.'), app_name)
+os.makedirs(app_data_dir, exist_ok=True)
+log_file = os.path.join(app_data_dir, "app.log")
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
         logging.StreamHandler(sys.stdout),
-        logging.FileHandler("app.log", encoding="utf-8")
+        logging.FileHandler(log_file, encoding="utf-8")
     ]
 )
 

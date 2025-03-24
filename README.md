@@ -1,4 +1,4 @@
-# Khmer TTS Application
+# Khmer STT Application
 
 A Windows application that allows recording audio with a global shortcut and transcribing it using different models.
 
@@ -24,7 +24,7 @@ A Windows application that allows recording audio with a global shortcut and tra
 ### For End Users
 
 1. Download the installer from the releases page or request it from the developer.
-2. Run the `KhmerTTSSetup.exe` installer.
+2. Run the `KhmerSTTSetup.exe` installer.
 3. Follow the on-screen instructions to complete the installation.
 4. Optionally, enable the "Start automatically with Windows" option during installation.
 5. Launch the application from the Start menu or desktop shortcut.
@@ -35,7 +35,7 @@ A Windows application that allows recording audio with a global shortcut and tra
 1. Clone the repository:
    ```
    git clone <repository-url>
-   cd khmer-tts-app
+   cd khmer-stt-app
    ```
 
 2. Install the required dependencies:
@@ -101,36 +101,45 @@ To build the Windows installer:
    ```
    build_installer.bat
    ```
-
-4. The installer (`KhmerTTSSetup.exe`) will be created in the project root directory.
+   This will create an installer at `output/KhmerSTTSetup.exe`.
 
 ## Usage
 
-1. Start the application. It will automatically minimize to the system tray.
-2. Press and hold the configured shortcut (default: Ctrl+Alt+Space) to record audio.
-3. Release the shortcut to stop recording and start transcription.
-4. The transcribed text will be inserted at the cursor position.
+1. The application runs in the background with a system tray icon.
+2. Press and hold the shortcut key combination (default: Ctrl+Alt+Space) in any application to start recording.
+3. Release the keys to stop recording and start transcription.
+4. An overlay will show the status of recording and transcription.
+5. The transcribed text will be inserted at your cursor position.
 
 ## Configuration
 
-Click on the system tray icon and select "Settings" to configure the application:
+Access the settings dialog by clicking on the system tray icon:
 
-- Change the recording shortcut
-- Select the default transcription model
-- Configure API keys
-- Change the language
-- Customize the overlay appearance
-- Configure startup behavior
+- **General tab**: Configure startup behavior, minimize options, and keyboard shortcut
+- **API Keys tab**: Enter and test your Google Gemini and ElevenLabs API keys
+- **Language tab**: Set your preferred language for transcription
+
+## Technical Details
+
+- Built with Python and PyQt5
+- Uses pynput for global keyboard shortcuts
+- Utilizes PyAudio for audio recording
+- Supports two transcription models: Google Gemini Flash and ElevenLabs
+- Secure API key storage via Windows Credentials Manager
+- Custom overlay widget for status display
+
+## Troubleshooting
+
+- **Application doesn't start**: Check if you have Python installed and all dependencies.
+- **Shortcut doesn't work**: Make sure no other application is using the same shortcut.
+- **Transcription fails**: Verify your API keys and internet connection.
+- **Text insertion issues**: The application simulates keyboard input; some applications may block this.
 
 ## License
 
-[MIT License](LICENSE)
+MIT License - See LICENSE file for details.
 
 ## Acknowledgements
 
-This application uses the following open-source libraries:
-- PyQt5 for the GUI
-- pynput for global keyboard shortcuts
-- pyaudio for audio recording
-- Google Generative AI Python SDK for Gemini API
-- ElevenLabs Python SDK for ElevenLabs API
+- Thanks to the Google Gemini and ElevenLabs teams for providing the APIs
+- Special thanks to contributors and testers

@@ -1,5 +1,5 @@
 """
-Create a simple icon for the Khmer TTS application.
+Create a simple icon for the Khmer STT application.
 This will be used by the installer.
 """
 import os
@@ -32,7 +32,7 @@ try:
             font = ImageFont.load_default()
 
     # Draw text
-    text = "KH"
+    text = "KM"
     # Use getbbox or getsize based on Pillow version
     text_bbox = None
     try:

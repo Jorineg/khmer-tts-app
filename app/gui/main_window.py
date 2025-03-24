@@ -109,7 +109,7 @@ class MainWindow(QMainWindow):
     def setup_ui(self):
         """Set up the UI elements"""
         # Set window properties
-        self.setWindowTitle("Khmer TTS")
+        self.setWindowTitle("Khmer STT")
         self.setMinimumWidth(500)
         self.setMinimumHeight(500)
         
@@ -168,7 +168,7 @@ class MainWindow(QMainWindow):
         layout.addWidget(icon_label)
         
         # Title label
-        title_label = QLabel("Khmer TTS Application")
+        title_label = QLabel("Khmer STT Application")
         title_label.setAlignment(Qt.AlignCenter)
         title_label.setStyleSheet("font-size: 18px; font-weight: bold;")
         layout.addWidget(title_label)
@@ -545,7 +545,7 @@ class MainWindow(QMainWindow):
         """Set up the system tray icon"""
         # Create the tray icon with the same icon as the application
         self.tray_icon = QSystemTrayIcon(self.create_app_icon(), self)
-        self.tray_icon.setToolTip("Khmer TTS - Voice to Text")
+        self.tray_icon.setToolTip("Khmer STT - Voice to Text")
         
         # Create tray menu
         tray_menu = QMenu()
@@ -605,7 +605,7 @@ class MainWindow(QMainWindow):
         # Minimize to tray instead of closing
         if self.tray_icon.isVisible():
             QMessageBox.information(
-                self, "Khmer TTS",
+                self, "Khmer STT",
                 "The application will keep running in the system tray. "
                 "To terminate the program, choose 'Exit' in the context menu "
                 "of the system tray icon."
