@@ -54,6 +54,35 @@ A Windows application that allows recording audio with a global shortcut and tra
    python main.py
    ```
 
+### Building the Application
+
+You have several options to build the executable:
+
+#### Option 1: Simple Build (Recommended for most users)
+1. Run the `simple_win11_build.bat` script:
+   ```
+   simple_win11_build.bat
+   ```
+   This creates a single-file executable that's easy to distribute.
+
+#### Option 2: GUI-based Build
+1. Run the `use_auto_py_to_exe.bat` script:
+   ```
+   use_auto_py_to_exe.bat
+   ```
+   This opens a graphical interface where you can configure and build the executable.
+
+#### Option 3: GitHub Actions (Recommended for CI/CD)
+1. Push your code to a GitHub repository with the included workflow file.
+2. GitHub will automatically build the executable and installer.
+3. Download the installer from the GitHub Actions artifacts.
+
+#### Option 4: Alternative Packaging Tools
+The repository also includes setup scripts for other packaging tools:
+- `setup_briefcase.bat` - Uses BeeWare's Briefcase for cross-platform packaging
+- `setup_pyoxidizer.bat` - Uses PyOxidizer for more optimized executables
+- `build_with_pyapp.bat` - Uses PyApp for simpler Windows packaging
+
 ### Building the Installer
 
 To build the Windows installer:
