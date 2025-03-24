@@ -30,134 +30,125 @@ jobs:
           New-Item -ItemType Directory -Path resources
         }
         
-    - name: Create icon
+    - name: Create fallback icon directly
       run: |
-        try {
-          python create_icon.py
-        } catch {
-          Write-Host "Icon creation failed, creating simple fallback icon..."
-          $iconContent = @"
-          from PIL import Image, ImageDraw
-          
-          # Create a blank image with transparent background
-          size = (256, 256)
-          img = Image.new('RGBA', size, color=(0, 0, 0, 0))
-          draw = ImageDraw.Draw(img)
-          
-          # Draw a simple K letter
-          draw.rectangle([50, 50, 206, 206], fill=(66, 133, 244, 255), outline=(25, 75, 175, 255), width=8)
-          draw.line([(80, 80), (80, 176)], fill=(255, 255, 255, 255), width=15)
-          draw.line([(80, 128), (130, 80)], fill=(255, 255, 255, 255), width=15)
-          draw.line([(80, 128), (130, 176)], fill=(255, 255, 255, 255), width=15)
-          draw.line([(150, 110), (200, 110)], fill=(255, 255, 255, 255), width=15)
-          draw.line([(150, 146), (200, 146)], fill=(255, 255, 255, 255), width=15)
-          
-          # Save as PNG
-          img.save('resources/icon.png')
-          
-          # Save as ICO
-          img.save('resources/icon.ico', format='ICO', sizes=[(256, 256), (128, 128), (64, 64), (32, 32), (16, 16)])
-          "@
-          
-          # Save the script and run it
-          Set-Content -Path "create_fallback_icon.py" -Value $iconContent
-          python create_fallback_icon.py
-        }
+        # Create a simple Python script to generate an icon directly
+        $simpleIcon = @"
+from PIL import Image, ImageDraw
+
+# Create a blank image with blue background
+size = (256, 256)
+img = Image.new('RGBA', size, color=(65, 105, 225, 255))
+draw = ImageDraw.Draw(img)
+
+# Draw a simple white K
+thickness = 30
+draw.line([(80, 80), (80, 176)], fill=(255, 255, 255, 255), width=thickness)
+draw.line([(80, 128), (130, 80)], fill=(255, 255, 255, 255), width=thickness)
+draw.line([(80, 128), (130, 176)], fill=(255, 255, 255, 255), width=thickness)
+
+# Save both formats
+img.save('resources/icon.png')
+img.save('resources/icon.ico', format='ICO', sizes=[(256, 256), (128, 128), (64, 64), (32, 32), (16, 16)])
+"@
+
+        Set-Content -Path "make_icon.py" -Value $simpleIcon
+        python make_icon.py
       
     - name: Build with PyInstaller
       run: |
         pyinstaller --clean --icon=resources/icon.ico --add-data="resources;resources" --hidden-import=keyring.backends.Windows --hidden-import=pynput.keyboard._win32 --hidden-import=pynput.mouse._win32 --hidden-import=google.generativeai --hidden-import=elevenlabs --collect-all=pynput --collect-all=elevenlabs --collect-all=pyaudio --collect-all=keyring --collect-all=google.generativeai --onefile --noconsole --name="Khmer TTS" main.py
         
-    - name: Create Inno Setup script
-      run: |
-        $content = @"
-        #define MyAppName "Khmer TTS"
-        #define MyAppVersion "1.0.0"
-        #define MyAppPublisher "Khmer TTS"
-        #define MyAppURL "https://www.khmertts.com/"
-        #define MyAppExeName "Khmer TTS.exe"
-        
-        [Setup]
-        AppId={{76D75E0C-27C7-4401-A419-F43D3C2B30DE}
-        AppName={#MyAppName}
-        AppVersion={#MyAppVersion}
-        AppPublisher={#MyAppPublisher}
-        AppPublisherURL={#MyAppURL}
-        AppSupportURL={#MyAppURL}
-        AppUpdatesURL={#MyAppURL}
-        DefaultDirName={autopf}\{#MyAppName}
-        DefaultGroupName={#MyAppName}
-        DisableProgramGroupPage=yes
-        LicenseFile=LICENSE.txt
-        OutputDir=installer
-        OutputBaseFilename=KhmerTTS_Setup
-        Compression=lzma
-        SolidCompression=yes
-        WizardStyle=modern
-        
-        [Languages]
-        Name: "english"; MessagesFile: "compiler:Default.isl"
-        
-        [Tasks]
-        Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
-        Name: "startmenu"; Description: "Create Start Menu shortcuts"; GroupDescription: "{cm:AdditionalIcons}";
-        Name: "autostart"; Description: "Start automatically when Windows starts"; GroupDescription: "Windows Integration";
-        
-        [Files]
-        Source: "dist\Khmer TTS.exe"; DestDir: "{app}"; Flags: ignoreversion
-        
-        [Icons]
-        Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
-        Name: "{group}\Uninstall {#MyAppName}"; Filename: "{uninstallexe}"
-        Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
-        
-        [Registry]
-        Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "Khmer TTS"; ValueData: "{app}\{#MyAppExeName}"; Flags: uninsdeletevalue; Tasks: autostart
-        
-        [Run]
-        Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
-        "@
-        
-        Set-Content -Path "installer.iss" -Value $content
-        
-    - name: Create LICENSE file
-      run: |
-        $content = @"
-        MIT License
-        
-        Copyright (c) 2025 Khmer TTS
-        
-        Permission is hereby granted, free of charge, to any person obtaining a copy
-        of this software and associated documentation files (the "Software"), to deal
-        in the Software without restriction, including without limitation the rights
-        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-        copies of the Software, and to permit persons to whom the Software is
-        furnished to do so, subject to the following conditions:
-        
-        The above copyright notice and this permission notice shall be included in all
-        copies or substantial portions of the Software.
-        
-        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-        SOFTWARE.
-        "@
-        
-        Set-Content -Path "LICENSE.txt" -Value $content
-        
     - name: Install Inno Setup
       run: |
-        Invoke-WebRequest -Uri "https://jrsoftware.org/download.php/is.exe" -OutFile "is.exe"
-        Start-Process -FilePath "is.exe" -ArgumentList "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-" -Wait
+        Invoke-WebRequest -Uri "https://files.jrsoftware.org/is/6/innosetup-6.2.2.exe" -OutFile "innosetup.exe"
+        Start-Process -FilePath "innosetup.exe" -ArgumentList "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-" -Wait
         
-    - name: Create installer with Inno Setup
+    - name: Create Inno Setup script for one-file executable
       run: |
-        & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
+        $innoSetupScript = @"
+#define MyAppName "Khmer TTS"
+#define MyAppVersion "1.0"
+#define MyAppPublisher "Khmer TTS Team"
+#define MyAppURL "https://github.com/yourusername/khmer-tts"
+#define MyAppExeName "Khmer TTS.exe"
+
+[Setup]
+AppId={{C0D99F91-5C28-4C21-A2BC-B3B41E0F61A3}
+AppName={#MyAppName}
+AppVersion={#MyAppVersion}
+AppPublisher={#MyAppPublisher}
+AppPublisherURL={#MyAppURL}
+AppSupportURL={#MyAppURL}
+AppUpdatesURL={#MyAppURL}
+DefaultDirName={autopf}\{#MyAppName}
+DefaultGroupName={#MyAppName}
+AllowNoIcons=yes
+LicenseFile=LICENSE
+OutputDir=installer
+OutputBaseFilename=KhmerTTS_Setup
+SetupIconFile=resources\icon.ico
+Compression=lzma
+SolidCompression=yes
+WizardStyle=modern
+PrivilegesRequired=admin
+
+[Languages]
+Name: "english"; MessagesFile: "compiler:Default.isl"
+
+[Tasks]
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+Name: "autostart"; Description: "Start automatically with Windows"; GroupDescription: "Windows Integration"
+
+[Files]
+Source: "dist\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "LICENSE"; DestDir: "{app}"; Flags: ignoreversion
+
+[Icons]
+Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
+Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
+Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
+
+[Registry]
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "Khmer TTS"; ValueData: """{app}\{#MyAppExeName}"""; Flags: uninsdeletevalue; Tasks: autostart
+
+[Run]
+Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
+"@
+
+        # Create a simple LICENSE file if it doesn't exist
+        if (-not (Test-Path "LICENSE")) {
+          Set-Content -Path "LICENSE" -Value "MIT License
+          
+Copyright (c) 2025 Khmer TTS Team
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the 'Software'), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
+        }
         
-    - name: Upload artifacts
+        # Create installer directory if it doesn't exist
+        if (-not (Test-Path "installer")) {
+          New-Item -ItemType Directory -Path "installer"
+        }
+        
+        # Create Inno Setup script
+        Set-Content -Path "installer.iss" -Value $innoSetupScript
+        
+    - name: Build installer
+      run: |
+        # Run Inno Setup
+        & 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe' installer.iss
+        
+    - name: Upload executable
+      uses: actions/upload-artifact@v4
+      with:
+        name: khmer-tts-exe
+        path: dist/Khmer TTS.exe
+        
+    - name: Upload installer
       uses: actions/upload-artifact@v4
       with:
         name: khmer-tts-installer
