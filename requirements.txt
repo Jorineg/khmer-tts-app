@@ -12,7 +12,7 @@ pynput==1.7.6
 pyperclip==1.8.2
 
 # Google Gemini API
-google.generativeai==0.8.4
+google-genai
 
 # ElevenLabs API
 elevenlabs

@@ -66,6 +66,15 @@ jobs:
         $installScript = @"
         @echo off
         echo Installing Khmer TTS...
+
+        :: Check for administrator privileges
+        net session >nul 2>&1
+        if %errorlevel% neq 0 (
+            echo This installer requires administrator privileges.
+            echo Please right-click on this batch file and select "Run as administrator".
+            pause
+            exit /b 1
+        )
         
         set INSTALL_DIR=%PROGRAMFILES%\Khmer TTS
         
@@ -76,10 +85,11 @@ jobs:
         copy /Y "LICENSE.txt" "%INSTALL_DIR%\"
         
         echo Creating shortcuts...
-        powershell -Command "$s=(New-Object -COM WScript.Shell).CreateShortcut('%USERPROFILE%\Desktop\Khmer TTS.lnk');$s.TargetPath='%INSTALL_DIR%\Khmer TTS.exe';$s.Save()"
-        powershell -Command "$s=(New-Object -COM WScript.Shell).CreateShortcut('%APPDATA%\Microsoft\Windows\Start Menu\Programs\Khmer TTS.lnk');$s.TargetPath='%INSTALL_DIR%\Khmer TTS.exe';$s.Save()"
+        powershell -Command "$WshShell = New-Object -ComObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut('%USERPROFILE%\Desktop\Khmer TTS.lnk'); $Shortcut.TargetPath = '%INSTALL_DIR%\Khmer TTS.exe'; $Shortcut.Save()"
+        powershell -Command "$WshShell = New-Object -ComObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut('%APPDATA%\Microsoft\Windows\Start Menu\Programs\Khmer TTS.lnk'); $Shortcut.TargetPath = '%INSTALL_DIR%\Khmer TTS.exe'; $Shortcut.Save()"
         
         echo Installation complete!
+        pause
         "@
         Set-Content -Path "install.bat" -Value $installScript
         

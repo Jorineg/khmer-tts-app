@@ -12,7 +12,6 @@ from google.genai import types
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
 from config import get_google_api_key
 from app.transcription.models.base_model import BaseSTTModel
-
 class GeminiModel(BaseSTTModel):
     """
     Base class for Google Gemini models
