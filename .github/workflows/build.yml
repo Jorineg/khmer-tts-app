@@ -30,24 +30,25 @@ jobs:
         
     - name: Create icon
       run: |
-        New-Item -Force -Path make_icon.py -ItemType File -Value @'
-from PIL import Image, ImageDraw
+        $iconScript = @"
+        from PIL import Image, ImageDraw
 
-# Create a blank image with blue background
-size = (256, 256)
-img = Image.new("RGBA", size, color=(65, 105, 225, 255))
-draw = ImageDraw.Draw(img)
+        # Create a blank image with blue background
+        size = (256, 256)
+        img = Image.new("RGBA", size, color=(65, 105, 225, 255))
+        draw = ImageDraw.Draw(img)
 
-# Draw a simple white K
-thickness = 30
-draw.line([(80, 80), (80, 176)], fill=(255, 255, 255, 255), width=thickness)
-draw.line([(80, 128), (130, 80)], fill=(255, 255, 255, 255), width=thickness)
-draw.line([(80, 128), (130, 176)], fill=(255, 255, 255, 255), width=thickness)
+        # Draw a simple white K
+        thickness = 30
+        draw.line([(80, 80), (80, 176)], fill=(255, 255, 255, 255), width=thickness)
+        draw.line([(80, 128), (130, 80)], fill=(255, 255, 255, 255), width=thickness)
+        draw.line([(80, 128), (130, 176)], fill=(255, 255, 255, 255), width=thickness)
 
-# Save both formats
-img.save("resources/icon.png")
-img.save("resources/icon.ico", format="ICO", sizes=[(256, 256), (128, 128), (64, 64), (32, 32), (16, 16)])
-'@
+        # Save both formats
+        img.save("resources/icon.png")
+        img.save("resources/icon.ico", format="ICO", sizes=[(256, 256), (128, 128), (64, 64), (32, 32), (16, 16)])
+        "@
+        Set-Content -Path "make_icon.py" -Value $iconScript
         python make_icon.py
       
     - name: Build with PyInstaller
@@ -61,70 +62,72 @@ img.save("resources/icon.ico", format="ICO", sizes=[(256, 256), (128, 128), (64,
         
     - name: Create LICENSE file
       run: |
-        New-Item -Force -Path LICENSE -ItemType File -Value @'
-MIT License
+        $licenseContent = @"
+        MIT License
 
-Copyright (c) 2025 Khmer TTS Team
+        Copyright (c) 2025 Khmer TTS Team
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+        Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+        The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-'@
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+        "@
+        Set-Content -Path "LICENSE" -Value $licenseContent
         
     - name: Create Inno Setup script
       run: |
         mkdir -Force installer
-        New-Item -Force -Path installer.iss -ItemType File -Value @'
-#define MyAppName "Khmer TTS"
-#define MyAppVersion "1.0"
-#define MyAppPublisher "Khmer TTS Team"
-#define MyAppURL "https://github.com/yourusername/khmer-tts"
-#define MyAppExeName "Khmer TTS.exe"
+        $innoScript = @"
+        #define MyAppName "Khmer TTS"
+        #define MyAppVersion "1.0"
+        #define MyAppPublisher "Khmer TTS Team"
+        #define MyAppURL "https://github.com/yourusername/khmer-tts"
+        #define MyAppExeName "Khmer TTS.exe"
 
-[Setup]
-AppId={{C0D99F91-5C28-4C21-A2BC-B3B41E0F61A3}
-AppName={#MyAppName}
-AppVersion={#MyAppVersion}
-AppPublisher={#MyAppPublisher}
-AppPublisherURL={#MyAppURL}
-AppSupportURL={#MyAppURL}
-AppUpdatesURL={#MyAppURL}
-DefaultDirName={autopf}\{#MyAppName}
-DefaultGroupName={#MyAppName}
-AllowNoIcons=yes
-LicenseFile=LICENSE
-OutputDir=installer
-OutputBaseFilename=KhmerTTS_Setup
-SetupIconFile=resources\icon.ico
-Compression=lzma
-SolidCompression=yes
-WizardStyle=modern
-PrivilegesRequired=admin
+        [Setup]
+        AppId={{C0D99F91-5C28-4C21-A2BC-B3B41E0F61A3}
+        AppName={#MyAppName}
+        AppVersion={#MyAppVersion}
+        AppPublisher={#MyAppPublisher}
+        AppPublisherURL={#MyAppURL}
+        AppSupportURL={#MyAppURL}
+        AppUpdatesURL={#MyAppURL}
+        DefaultDirName={autopf}\{#MyAppName}
+        DefaultGroupName={#MyAppName}
+        AllowNoIcons=yes
+        LicenseFile=LICENSE
+        OutputDir=installer
+        OutputBaseFilename=KhmerTTS_Setup
+        SetupIconFile=resources\icon.ico
+        Compression=lzma
+        SolidCompression=yes
+        WizardStyle=modern
+        PrivilegesRequired=admin
 
-[Languages]
-Name: "english"; MessagesFile: "compiler:Default.isl"
+        [Languages]
+        Name: "english"; MessagesFile: "compiler:Default.isl"
 
-[Tasks]
-Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
-Name: "autostart"; Description: "Start automatically with Windows"; GroupDescription: "Windows Integration"
+        [Tasks]
+        Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+        Name: "autostart"; Description: "Start automatically with Windows"; GroupDescription: "Windows Integration"
 
-[Files]
-Source: "dist\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "LICENSE"; DestDir: "{app}"; Flags: ignoreversion
+        [Files]
+        Source: "dist\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+        Source: "LICENSE"; DestDir: "{app}"; Flags: ignoreversion
 
-[Icons]
-Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
-Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
-Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
+        [Icons]
+        Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
+        Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
+        Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
-[Registry]
-Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "Khmer TTS"; ValueData: """{app}\{#MyAppExeName}"""; Flags: uninsdeletevalue; Tasks: autostart
+        [Registry]
+        Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "Khmer TTS"; ValueData: """{app}\{#MyAppExeName}"""; Flags: uninsdeletevalue; Tasks: autostart
 
-[Run]
-Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
-'@
+        [Run]
+        Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
+        "@
+        Set-Content -Path "installer.iss" -Value $innoScript
         
     - name: Build installer
       run: |
