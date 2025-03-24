@@ -5,6 +5,8 @@ Settings manager to handle application settings and API keys
 import os
 import json
 import logging
+import sys
+import winreg
 from PyQt5.QtCore import QSettings
 import keyring
 import keyring.errors
@@ -38,6 +40,9 @@ class SettingsManager:
         
         # Initialize settings with defaults if they don't exist
         self._initialize_settings()
+        
+        # Sync registry with settings
+        self.sync_autostart_with_setting()
     
     def _initialize_settings(self):
         """Initialize settings with default values if they don't exist"""
@@ -77,6 +82,10 @@ class SettingsManager:
         """
         self.settings.setValue(key, value)
         self.settings.sync()
+        
+        # Update autostart if this setting changed
+        if key == "run_on_startup":
+            self.update_autostart_status()
     
     def get_api_key(self, service):
         """
@@ -139,3 +148,84 @@ class SettingsManager:
         }
         
         return languages
+        
+    def update_autostart_status(self):
+        """Update autostart registry based on current setting"""
+        run_on_startup = self.get_setting("run_on_startup", True)
+        self.set_autostart_registry(run_on_startup)
+        
+    def sync_autostart_with_setting(self):
+        """
+        Sync the registry autostart status with the application setting.
+        This ensures registry and settings are aligned at startup.
+        """
+        run_on_startup = self.get_setting("run_on_startup", True)
+        registry_status = self.check_autostart_status()
+        
+        # If there's a mismatch, update the registry to match the setting
+        if run_on_startup != registry_status:
+            self.set_autostart_registry(run_on_startup)
+    
+    def set_autostart_registry(self, enable=True):
+        """
+        Set or remove autostart registry entry
+        
+        Args:
+            enable: Whether to enable or disable autostart
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        app_path = sys.executable
+        try:
+            registry_key = winreg.OpenKey(
+                winreg.HKEY_CURRENT_USER,
+                r"Software\Microsoft\Windows\CurrentVersion\Run",
+                0,
+                winreg.KEY_WRITE
+            )
+            
+            if enable:
+                winreg.SetValueEx(registry_key, APP_NAME, 0, winreg.REG_SZ, f'"{app_path}"')
+                logger.info(f"Added {APP_NAME} to startup registry")
+            else:
+                try:
+                    winreg.DeleteValue(registry_key, APP_NAME)
+                    logger.info(f"Removed {APP_NAME} from startup registry")
+                except FileNotFoundError:
+                    # Key doesn't exist, nothing to delete
+                    pass
+                    
+            winreg.CloseKey(registry_key)
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error managing autostart registry: {str(e)}")
+            return False
+    
+    def check_autostart_status(self):
+        """
+        Check if application is set to autostart in registry
+        
+        Returns:
+            True if enabled, False otherwise
+        """
+        try:
+            registry_key = winreg.OpenKey(
+                winreg.HKEY_CURRENT_USER,
+                r"Software\Microsoft\Windows\CurrentVersion\Run",
+                0,
+                winreg.KEY_READ
+            )
+            
+            try:
+                value, _ = winreg.QueryValueEx(registry_key, APP_NAME)
+                winreg.CloseKey(registry_key)
+                return True
+            except FileNotFoundError:
+                winreg.CloseKey(registry_key)
+                return False
+                
+        except Exception as e:
+            logger.error(f"Error checking autostart registry: {str(e)}")
+            return False

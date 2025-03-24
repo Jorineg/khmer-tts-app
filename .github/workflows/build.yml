@@ -55,10 +55,31 @@ jobs:
       run: |
         pyinstaller --clean --icon=resources/icon.ico --add-data="resources;resources" --hidden-import=keyring.backends.Windows --hidden-import=pynput.keyboard._win32 --hidden-import=pynput.mouse._win32 --hidden-import=google.generativeai --hidden-import=elevenlabs --collect-all=pynput --collect-all=elevenlabs --collect-all=pyaudio --collect-all=keyring --collect-all=google.generativeai --onefile --noconsole --name="Khmer TTS" main.py
         
-    - name: Install Inno Setup
+    # Create a simple installer batch script
+    - name: Create simple installer batch script
       run: |
-        Invoke-WebRequest -Uri "https://files.jrsoftware.org/is/6/innosetup-6.2.2.exe" -OutFile "innosetup.exe"
-        Start-Process -FilePath "innosetup.exe" -ArgumentList "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /SP-" -Wait
+        $installScript = @"
+        @echo off
+        echo Installing Khmer TTS...
+        
+        set INSTALL_DIR=%PROGRAMFILES%\Khmer TTS
+        
+        if not exist "%INSTALL_DIR%" mkdir "%INSTALL_DIR%"
+        
+        echo Copying files...
+        copy /Y "Khmer TTS.exe" "%INSTALL_DIR%\"
+        copy /Y "LICENSE" "%INSTALL_DIR%\"
+        
+        echo Creating shortcuts...
+        powershell -Command "$s=(New-Object -COM WScript.Shell).CreateShortcut('%USERPROFILE%\Desktop\Khmer TTS.lnk');$s.TargetPath='%INSTALL_DIR%\Khmer TTS.exe';$s.Save()"
+        powershell -Command "$s=(New-Object -COM WScript.Shell).CreateShortcut('%APPDATA%\Microsoft\Windows\Start Menu\Programs\Khmer TTS.lnk');$s.TargetPath='%INSTALL_DIR%\Khmer TTS.exe';$s.Save()"
+        
+        echo Installation complete!
+        "@
+        Set-Content -Path "install.bat" -Value $installScript
+        
+        # Package as a simple zip file
+        Compress-Archive -Path "dist\Khmer TTS.exe", "LICENSE", "install.bat" -DestinationPath "KhmerTTS_Package.zip" -Force
         
     - name: Create LICENSE file
       run: |
@@ -75,72 +96,14 @@ jobs:
         "@
         Set-Content -Path "LICENSE" -Value $licenseContent
         
-    - name: Create Inno Setup script
-      run: |
-        mkdir -Force installer
-        $innoScript = @"
-        #define MyAppName "Khmer TTS"
-        #define MyAppVersion "1.0"
-        #define MyAppPublisher "Khmer TTS Team"
-        #define MyAppURL "https://github.com/yourusername/khmer-tts"
-        #define MyAppExeName "Khmer TTS.exe"
-
-        [Setup]
-        AppId={{C0D99F91-5C28-4C21-A2BC-B3B41E0F61A3}
-        AppName={#MyAppName}
-        AppVersion={#MyAppVersion}
-        AppPublisher={#MyAppPublisher}
-        AppPublisherURL={#MyAppURL}
-        AppSupportURL={#MyAppURL}
-        AppUpdatesURL={#MyAppURL}
-        DefaultDirName={autopf}\{#MyAppName}
-        DefaultGroupName={#MyAppName}
-        AllowNoIcons=yes
-        LicenseFile=LICENSE
-        OutputDir=installer
-        OutputBaseFilename=KhmerTTS_Setup
-        SetupIconFile=resources\icon.ico
-        Compression=lzma
-        SolidCompression=yes
-        WizardStyle=modern
-        PrivilegesRequired=admin
-
-        [Languages]
-        Name: "english"; MessagesFile: "compiler:Default.isl"
-
-        [Tasks]
-        Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
-        Name: "autostart"; Description: "Start automatically with Windows"; GroupDescription: "Windows Integration"
-
-        [Files]
-        Source: "dist\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-        Source: "LICENSE"; DestDir: "{app}"; Flags: ignoreversion
-
-        [Icons]
-        Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
-        Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
-        Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
-
-        [Registry]
-        Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "Khmer TTS"; ValueData: """{app}\{#MyAppExeName}"""; Flags: uninsdeletevalue; Tasks: autostart
-
-        [Run]
-        Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
-        "@
-        Set-Content -Path "installer.iss" -Value $innoScript
-        
-    - name: Build installer
-      run: |
-        & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
-        
     - name: Upload executable
       uses: actions/upload-artifact@v4
       with:
         name: khmer-tts-exe
         path: dist/Khmer TTS.exe
         
-    - name: Upload installer
+    - name: Upload package
       uses: actions/upload-artifact@v4
       with:
-        name: khmer-tts-installer
-        path: installer/KhmerTTS_Setup.exe
+        name: khmer-tts-package
+        path: KhmerTTS_Package.zip
