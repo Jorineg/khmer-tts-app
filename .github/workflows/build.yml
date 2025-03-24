@@ -55,6 +55,11 @@ jobs:
       run: |
         pyinstaller --clean --icon=resources/icon.ico --add-data="resources;resources" --hidden-import=keyring.backends.Windows --hidden-import=pynput.keyboard._win32 --hidden-import=pynput.mouse._win32 --hidden-import=google.generativeai --hidden-import=elevenlabs --collect-all=pynput --collect-all=elevenlabs --collect-all=pyaudio --collect-all=keyring --collect-all=google.generativeai --onefile --noconsole --name="Khmer TTS" main.py
         
+    # Fix for tzdata missing warning
+    - name: Add missing imports
+      run: |
+        pip install tzdata
+        
     # Create a simple installer batch script
     - name: Create simple installer batch script
       run: |
@@ -68,7 +73,7 @@ jobs:
         
         echo Copying files...
         copy /Y "Khmer TTS.exe" "%INSTALL_DIR%\"
-        copy /Y "LICENSE" "%INSTALL_DIR%\"
+        copy /Y "LICENSE.txt" "%INSTALL_DIR%\"
         
         echo Creating shortcuts...
         powershell -Command "$s=(New-Object -COM WScript.Shell).CreateShortcut('%USERPROFILE%\Desktop\Khmer TTS.lnk');$s.TargetPath='%INSTALL_DIR%\Khmer TTS.exe';$s.Save()"
@@ -78,12 +83,10 @@ jobs:
         "@
         Set-Content -Path "install.bat" -Value $installScript
         
-        # Package as a simple zip file
-        Compress-Archive -Path "dist\Khmer TTS.exe", "LICENSE", "install.bat" -DestinationPath "KhmerTTS_Package.zip" -Force
-        
-    - name: Create LICENSE file
-      run: |
-        $licenseContent = @"
+        # Create LICENSE.txt for the package
+        $licenseContent = Get-Content -Path "LICENSE.txt" -Raw
+        if (-not $licenseContent) {
+            $licenseContent = @"
         MIT License
 
         Copyright (c) 2025 Khmer TTS Team
@@ -94,8 +97,12 @@ jobs:
 
         THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
         "@
-        Set-Content -Path "LICENSE" -Value $licenseContent
+            Set-Content -Path "LICENSE.txt" -Value $licenseContent
+        }
         
+        # Package as a simple zip file
+        Compress-Archive -Path "dist\Khmer TTS.exe", "LICENSE.txt", "install.bat" -DestinationPath "KhmerTTS_Package.zip" -Force
+    
     - name: Upload executable
       uses: actions/upload-artifact@v4
       with:
