@@ -3,8 +3,8 @@ API keys settings tab for the main application window
 """
 
 import logging
-from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLineEdit)
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtWidgets import (QWidget, QVBoxLayout, QLineEdit, QLabel)
+from PyQt5.QtCore import pyqtSignal, Qt
 
 from ..widgets import ( 
     TranslatableLabel,
@@ -90,8 +90,9 @@ class ApiKeysTab(QWidget):
         elevenlabs_layout.setContentsMargins(15, 15, 15, 15)
         
         # ElevenLabs API key description
-        self.elevenlabs_description = TranslatableLabel("<<api_keys_tab.elevenlabs_description>>")
+        self.elevenlabs_description = TranslatableLabel("<<api_keys_tab.elevenlabs_description>><br><b><<api_keys_tab.elevenlabs_recommendation>></b>")
         self.elevenlabs_description.setWordWrap(True)
+        self.elevenlabs_description.setTextFormat(Qt.RichText)
         self.elevenlabs_description.setStyleSheet(get_description_label_style())
         elevenlabs_layout.addWidget(self.elevenlabs_description)
         

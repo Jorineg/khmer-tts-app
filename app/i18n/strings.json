@@ -5,11 +5,11 @@
   },
   "window_title": {
     "en": "Khmer Speech-To-Text",
-    "km": "Khmer Speech-To-Text"
+    "km": "កម្មវិធីបំប្លែងសំឡេងទៅជាអក្សរខ្មែរ"
   },
   "tray_tooltip": {
     "en": "Khmer STT - Speech to Text",
-    "km": "Khmer STT - សំឡេងទៅជាអក្សរ"
+    "km": "Khmer STT - បំប្លែងសំឡេងទៅជាអក្សរ"
   },
   "tabs": {
     "overview": {
@@ -22,7 +22,7 @@
     },
     "api_keys": {
       "en": "API Keys",
-      "km": "លេខកូដ API"
+      "km": "កូនសោ API"
     },
     "language": {
       "en": "Language",
@@ -44,11 +44,11 @@
     },
     "app_description": {
       "en": "This application allows you to quickly transcribe speech in Khmer and other languages using AI. Hold down the shortcut key to record your voice, then release to transcribe.",
-      "km": "កម្មវិធីនេះអនុញ្ញាតឱ្យអ្នកចម្លងការនិយាយជាភាសាខ្មែរ និងភាសាផ្សេងទៀតយ៉ាងរហ័សដោយប្រើបញ្ញាសិប្បនិម្មិត។ សង្កត់គ្រាប់ចុចផ្លូវកាត់ដើម្បីថតសំឡេងរបស់អ្នក បន្ទាប់មកលែងដើម្បីចម្លង។"
+      "km": "កម្មវិធីនេះអនុញ្ញាតឱ្យអ្នកបំប្លែងការនិយាយជាភាសាខ្មែរ និងភាសាផ្សេងទៀតទៅជាអក្សរយ៉ាងរហ័សដោយប្រើបញ្ញាសិប្បនិម្មិត (AI)។ សង្កត់គ្រាប់ចុចផ្លូវកាត់ដើម្បីថតសំឡេងរបស់អ្នក បន្ទាប់មកលែងដើម្បីបំប្លែងជាអក្សរ។"
     },
     "description": {
       "en": "Quickly transcribe spoken Khmer language to text using AI. The app works in any text field.",
-      "km": "ចម្លងភាសាខ្មែរដែលបាននិយាយទៅជាអត្ថបទយ៉ាងឆាប់រហ័សដោយប្រើ AI។ កម្មវិធីនេះដំណើរការនៅក្នុងវាលអត្ថបទណាមួយ។"
+      "km": "បំប្លែងភាសាខ្មែរដែលបាននិយាយទៅជាអត្ថបទយ៉ាងឆាប់រហ័សដោយប្រើ AI។ កម្មវិធីនេះដំណើរការនៅក្នុងគ្រប់ប្រអប់អត្ថបទ។"
     },
     "current_shortcut": {
       "en": "Current shortcut: {shortcut}",
@@ -63,28 +63,28 @@
       "km": "ស្ថានភាពបច្ចុប្បន្ន៖"
     },
     "instructions": {
-      "en": "Press and hold the shortcut key (shown above) to start recording. Release the key to finish recording and begin transcription.",
-      "km": "សង្កត់និងទប់គ្រាប់ចុចផ្លូវកាត់ (បង្ហាញខាងលើ) ដើម្បីចាប់ផ្តើមថត។ ​ដោះគ្រាប់ចុចដើម្បីបញ្ចប់ការថត និងចាប់ផ្តើមបកប្រែ។"
+      "en": "Press and hold the shortcut key (shown above) to start recording. Release the key to finish recording and begin transcription. The text will be inserted at the current cursor position.",
+      "km": "សង្កត់និងទប់គ្រាប់ចុចផ្លូវកាត់ (បង្ហាញខាងលើ) ដើម្បីចាប់ផ្តើមថត។ ដោះគ្រាប់ចុចដើម្បីបញ្ចប់ការថត និងចាប់ផ្តើមបំប្លែងជាអក្សរ។ អត្ថបទនឹងត្រូវបានបញ្ចូលត្រង់ទីតាំងឃែរស៊ឺរ​បច្ចុប្បន្ន។"
     },
     "features": {
       "en": "Features",
       "km": "លក្ខណៈពិសេស"
     },
     "feature_list": {
-      "en": "Works with any text field\nSimple one-key shortcut\nSupports Khmer language\nUses state-of-the-art AI models\nWorks offline with some models",
-      "km": "ដំណើរការជាមួយវាលអត្ថបទណាមួយ\nផ្លូវកាត់គ្រាប់ចុចងាយស្រួល\nគាំទ្រភាសាខ្មែរ\nប្រើម៉ូដែល AI ទំនើបបំផុត\nដំណើរការក្រៅបណ្តាញជាមួយម៉ូដែលមួយចំនួន"
+      "en": "Works with any text field or document\nSimple shortcut\nSupports Khmer language\nUses state-of-the-art AI models\nFree to use",
+      "km": "ដំណើរការជាមួយគ្រប់ប្រអប់អត្ថបទ ឬឯកសារ\nផ្លូវកាត់ងាយស្រួលប្រើ\nគាំទ្រភាសាខ្មែរ\nប្រើម៉ូដែល AI ទំនើបបំផុត\nប្រើប្រាស់ដោយឥតគិតថ្លៃ"
     },
     "api_keys_info": {
       "en": "Important: To use this application, you need to set up at least one API key for the transcription service you want to use. Go to the",
-      "km": "សំខាន់៖ ដើម្បីប្រើកម្មវិធីនេះ អ្នកត្រូវរៀបចំយ៉ាងហោចណាស់លេខកូដ API មួយសម្រាប់សេវាកម្មចម្លងដែលអ្នកចង់ប្រើ។"
+      "km": "សំខាន់៖ ដើម្បីប្រើកម្មវិធីនេះ អ្នកត្រូវរៀបចំយ៉ាងហោចណាស់កូនសោ API មួយសម្រាប់សេវាកម្មបំប្លែងសំឡេងដែលអ្នកចង់ប្រើ។ សូមចូលទៅកាន់ផ្ទាំង"
     },
     "api_keys_link": {
       "en": "API Keys tab",
-      "km": "ផ្ទាំង API Keys"
+      "km": "កូនសោ API"
     },
     "api_keys_info2": {
       "en": "to set up your API keys.",
-      "km": "ដើម្បីរៀបចំយ៉ាងហោចណាស់លេខកូដ API របស់អ្នក។"
+      "km": "ដើម្បីរៀបចំកូនសោ API របស់អ្នក។"
     }
   },
   "general_tab": {
@@ -101,8 +101,8 @@
       "km": "ផ្លូវកាត់សម្រាប់ថត:"
     },
     "shortcut_description": {
-      "en": "Set the keyboard shortcut for starting and stopping recording. Hold the shortcut down to record, release to transcribe.",
-      "km": "កំណត់ផ្លូវកាត់ក្ដារចុចសម្រាប់ចាប់ផ្តើម និងបញ្ឈប់ការថត។ សង្កត់ផ្លូវកាត់ដើម្បីថត ដកចេញដើម្បីចម្លង។"
+      "en": "Set the keyboard shortcut for the voice recording. Hold the shortcut down to record, release to stop and transcribe.",
+      "km": "កំណត់ផ្លូវកាត់ក្ដារចុចសម្រាប់ការថតសំឡេង។ សង្កត់ផ្លូវកាត់ដើម្បីថត លែងដើម្បីបញ្ឈប់ និងបំប្លែងជាអក្សរ។"
     },
     "recording_shortcut": {
       "en": "Recording shortcut:",
@@ -114,11 +114,11 @@
     },
     "model_group": {
       "en": "Transcription Model",
-      "km": "គំរូចម្លង"
+      "km": "ម៉ូដែលបំប្លែងសំឡេង"
     },
     "default_model": {
       "en": "Model:",
-      "km": "គំរូ៖"
+      "km": "ម៉ូដែល៖"
     },
     "model_google": {
       "en": "Google Gemini Flash",
@@ -138,11 +138,11 @@
     },
     "show_overlay": {
       "en": "Show recording overlay",
-      "km": "បង្ហាញបន្ទាប់ការថត"
+      "km": "បង្ហាញផ្ទាំងថតត្រួតលើ"
     },
     "overlay_position": {
       "en": "Overlay position:",
-      "km": "ទីតាំងបន្ទាប់ការថត៖"
+      "km": "ទីតាំងផ្ទាំងថតត្រួតលើ៖"
     },
     "position_bottom": {
       "en": "Bottom of screen",
@@ -154,7 +154,7 @@
     },
     "startup_group": {
       "en": "Startup Options",
-      "km": "ជម្រើសចាប់ផ្តើម"
+      "km": "ជម្រើសពេលចាប់ផ្តើម"
     },
     "run_on_startup": {
       "en": "Run on system startup",
@@ -165,22 +165,22 @@
       "km": "ចាប់ផ្តើមបង្រួមទៅថាសប្រព័ន្ធ"
     },
     "startup_description": {
-      "en": "Note: The app will always run in the background even when closed unless you explicitly quit through the tray icon.",
-      "km": "ចំណាំ៖ កម្មវិធីនឹងដំណើរការនៅផ្ទៃខាងក្រោយជានិច្ច ទោះបីជាបានបិទ លុះត្រាតែអ្នកចាកចេញយ៉ាងច្បាស់លាស់តាមរយៈរូបតំណាងថាស។"
+      "en": "Note: The app will always run in the background even when closed unless you explicitly quit with the quit button or through the tray icon.",
+      "km": "ចំណាំ៖ កម្មវិធីនឹងដំណើរការនៅផ្ទៃខាងក្រោយជានិច្ច ទោះបីជាបិទបង្អួចក៏ដោយ លុះត្រាតែអ្នកចាកចេញពីកម្មវិធីទាំងស្រុងដោយប្រើប៊ូតុង 'ចាកចេញ' ឬតាមរយៈរូបតំណាងថាសប្រព័ន្ធ។"
     }
   },
   "api_keys_tab": {
     "title": {
       "en": "API Keys",
-      "km": "អាប់ផេតអេភីអាយ"
+      "km": "កូនសោ API"
     },
     "google_api_key": {
       "en": "Google Gemini API Key",
       "km": "កូនសោ API Google Gemini"
     },
     "google_description": {
-      "en": "Enter your Google Gemini API key to use Google's speech recognition service. You can get a free API key from Google AI Studio.",
-      "km": "បញ្ចូលកូនសោ API Google Gemini របស់អ្នកដើម្បីប្រើសេវាកម្មស្គាល់សំឡេងរបស់ Google។ អ្នកអាចទទួលបានកូនសោ API ឥតគិតថ្លៃពី Google AI Studio។"
+      "en": "Enter your Google Gemini API key to use Google's speech recognition service. You can get a free API key from Google AI Studio. Google allows 1500 requests per day for free with at most 15 requests per minute. When you reach this limit, the app will stop working, but you won't be charged.",
+      "km": "បញ្ចូលកូនសោ API Google Gemini របស់អ្នកដើម្បីប្រើសេវាកម្មសម្គាល់សំឡេងរបស់ Google។ អ្នកអាចទទួលបានកូនសោ API ដោយឥតគិតថ្លៃពី Google AI Studio។ Google អនុញ្ញាតឱ្យប្រើប្រាស់បាន ១៥០០សំណើក្នុងមួយថ្ងៃដោយឥតគិតថ្លៃ និងអតិបរមា ១៥សំណើក្នុងមួយនាទី។ នៅពេលអ្នកប្រើដល់ដែនកំណត់នេះ កម្មវិធីនឹងឈប់ដំណើរការ ប៉ុន្តែអ្នកនឹងមិនត្រូវបានគិតប្រាក់ឡើយ។"
     },
     "google_get_key": {
       "en": "Get API key here",
@@ -191,8 +191,12 @@
       "km": "កូនសោ API ElevenLabs"
     },
     "elevenlabs_description": {
-      "en": "Enter your ElevenLabs API key to use their speech recognition service. You can get a free API key from ElevenLabs website.",
-      "km": "បញ្ចូលកូនសោ API ElevenLabs របស់អ្នកដើម្បីប្រើសេវាកម្មស្គាល់សំឡេងរបស់ពួកគេ។ អ្នកអាចទទួលបានកូនសោ API ឥតគិតថ្លៃពីគេហទំព័រ ElevenLabs។"
+      "en": "Enter your ElevenLabs API key to use their speech recognition service. You can get a free API key from ElevenLabs website. ElevenLabs allows 2.5 hours of free audio transcription per month. When you reach this limit, the app will stop working, but you won't be charged.",
+      "km": "បញ្ចូលកូនសោ API ElevenLabs របស់អ្នកដើម្បីប្រើសេវាកម្មសម្គាល់សំឡេងរបស់ពួកគេ។ អ្នកអាចទទួលបានកូនសោ API ដោយឥតគិតថ្លៃពីគេហទំព័រ ElevenLabs។ ElevenLabs អនុញ្ញាតឱ្យបំប្លែងសំឡេងជាអក្សរដោយឥតគិតថ្លៃរយៈពេល ២.៥ ម៉ោងក្នុងមួយខែ។ នៅពេលអ្នកប្រើដល់ដែនកំណត់នេះ កម្មវិធីនឹងឈប់ដំណើរការ ប៉ុន្តែអ្នកនឹងមិនត្រូវបានគិតប្រាក់ឡើយ។"
+    },
+    "elevenlabs_recommendation": {
+      "en": "This model seems to perform better for Khmer language.",
+      "km": "ម៉ូដែលនេះហាក់ដូចជាដំណើរការបានល្អប្រសើរសម្រាប់ភាសាខ្មែរ។"
     },
     "elevenlabs_get_key": {
       "en": "Get API key here",
@@ -221,16 +225,16 @@
       "km": "ជ្រើសរើសភាសាដែលអ្នកនឹងនិយាយពេលថតសំឡេងរបស់អ្នក។ វាជួយឱ្យម៉ូដែលបំប្លែងសំឡេងយល់ពីការនិយាយរបស់អ្នកបានកាន់តែប្រសើរ។"
     },
     "language_note": {
-      "en": "Note: The transcription quality depends on the selected language and the clarity of your speech.",
-      "km": "ចំណាំ៖ គុណភាពនៃការបំប្លែងសំឡេងទៅជាអក្សរអាស្រ័យលើភាសាដែលបានជ្រើសរើស និងភាពច្បាស់នៃការនិយាយរបស់អ្នក។"
+      "en": "Note: The transcription quality depends on the selected transcription model, language and the clarity of your speech.",
+      "km": "ចំណាំ៖ គុណភាពនៃការបំប្លែងសំឡេងទៅជាអក្សរអាស្រ័យលើម៉ូដែលបំប្លែងសំឡេងដែលបានជ្រើសរើស ភាសាដែលបានជ្រើសរើស និងភាពច្បាស់នៃការនិយាយរបស់អ្នក។"
     },
     "transcription_models": {
       "en": "Transcription Models",
       "km": "ម៉ូដែលបំប្លែងសំឡេង"
     },
     "models_description": {
-      "en": "Select which transcription service to use. Different models may perform better for different languages.",
-      "km": "ជ្រើសរើសសេវាកម្មបំប្លែងសំឡេងដែលត្រូវប្រើប្រាស់។ ម៉ូដែលផ្សេងគ្នាអាចដំណើរការបានល្អសម្រាប់ភាសាផ្សេងៗគ្នា។"
+      "en": "Select the transcription service to use. Different models may perform better for different languages.",
+      "km": "ជ្រើសរើសសេវាកម្មបំប្លែងសំឡេងដែលត្រូវប្រើប្រាស់។ ម៉ូដែលផ្សេងគ្នាអាចដំណើរការបានល្អប្រសើរសម្រាប់ភាសាផ្សេងៗគ្នា។"
     }
   },
   "buttons": {
@@ -248,7 +252,7 @@
     },
     "exit": {
       "en": "Exit",
-      "km": "ចេញ"
+      "km": "ចាកចេញ"
     }
   },
   "notifications": {
@@ -258,7 +262,7 @@
     },
     "settings_saved_with_refresh": {
       "en": "Your settings have been saved and transcription models refreshed.",
-      "km": "ការកំណត់របស់អ្នកត្រូវបានរក្សាទុក ហើយម៉ូដែលចម្លងត្រូវបានធ្វើបច្ចុប្បន្នភាព។"
+      "km": "ការកំណត់របស់អ្នកត្រូវបានរក្សាទុក ហើយម៉ូដែលបំប្លែងសំឡេងត្រូវបានធ្វើបច្ចុប្បន្នភាព។"
     },
     "settings_saved": {
       "en": "Your settings have been saved successfully.",
@@ -266,15 +270,15 @@
     },
     "models_refreshed": {
       "en": "Transcription models have been refreshed.",
-      "km": "ម៉ូដែលចម្លងត្រូវបានធ្វើបច្ចុប្បន្នភាព។"
+      "km": "ម៉ូដែលបំប្លែងសំឡេងត្រូវបានធ្វើបច្ចុប្បន្នភាព។"
     },
     "transcription_error_title": {
       "en": "Transcription Error",
-      "km": "កំហុសក្នុងការចម្លង"
+      "km": "កំហុសក្នុងការបំប្លែងជាអក្សរ"
     },
     "transcription_error": {
       "en": "Error during transcription: {error}",
-      "km": "មានបញ្ហាក្នុងអំឡុងពេលចម្លង៖ {error}"
+      "km": "មានកំហុសកំឡុងពេលបំប្លែងជាអក្សរ៖ {error}"
     },
     "missing_api_key_title": {
       "en": "API Key Required",
@@ -282,7 +286,7 @@
     },
     "missing_api_key_error": {
       "en": "Transcription failed because no API key is available for the selected model ({model_name}). Please add an API key in the API Keys tab in Settings.",
-      "km": "ការចម្លងបានបរាជ័យព្រោះគ្មានកូនសោ API សម្រាប់គំរូដែលបានជ្រើសរើស ({model_name})។ សូមបន្ថែមកូនសោ API នៅក្នុងផ្ទាំងកូនសោ API ក្នុងការកំណត់។"
+      "km": "ការបំប្លែងជាអក្សរបានបរាជ័យ ព្រោះគ្មានកូនសោ API សម្រាប់ម៉ូដែលដែលបានជ្រើសរើស ({model_name})។ សូមបន្ថែមកូនសោ API នៅក្នុងផ្ទាំង កូនសោ API ក្នុង ការកំណត់។"
     },
     "network_error_title": {
       "en": "Network Connection Error",
@@ -290,7 +294,7 @@
     },
     "network_error_message": {
       "en": "Transcription failed because there is no internet connection. Please check your network connection and try again.",
-      "km": "ការចម្លងបានបរាជ័យព្រោះគ្មានការតភ្ជាប់អ៊ីនធឺណិត។ សូមពិនិត្យការតភ្ជាប់បណ្តាញរបស់អ្នក ហើយព្យាយាមម្តងទៀត។"
+      "km": "ការបំប្លែងជាអក្សរបានបរាជ័យ ព្រោះគ្មានការតភ្ជាប់អ៊ីនធឺណិត។ សូមពិនិត្យការតភ្ជាប់បណ្តាញរបស់អ្នក ហើយព្យាយាមម្តងទៀត។"
     },
     "api_error_title": {
       "en": "API Service Error",
@@ -298,23 +302,19 @@
     },
     "api_error_message": {
       "en": "Transcription failed due to a service error with {model_name}. This could be due to server issues or you may have reached your free API usage limit.",
-      "km": "ការចម្លងបានបរាជ័យដោយសារកំហុសក្នុងសេវាកម្មជាមួយ {model_name}។ នេះអាចបណ្តាលមកពីបញ្ហាម៉ាស៊ីនមេ ឬអ្នកអាចបានដល់ដែនកំណត់ប្រើប្រាស់ API ដោយឥតគិតថ្លៃរបស់អ្នក។"
+      "km": "ការបំប្លែងជាអក្សរបានបរាជ័យ ដោយសារកំហុសសេវាកម្មជាមួយ {model_name}។ នេះអាចបណ្ដាលមកពីបញ្ហាម៉ាស៊ីនមេរបស់សេវាកម្ម ឬអ្នកអាចប្រើប្រាស់លើសដែនកំណត់ API ដោយឥតគិតថ្លៃរបស់អ្នក។"
     },
     "transcription_failed_title": {
       "en": "Transcription Failed",
-      "km": "ការចម្លងបរាជ័យ"
+      "km": "ការបំប្លែងជាអក្សរបរាជ័យ"
     },
     "transcription_empty": {
       "en": "The transcription result was empty.",
-      "km": "លទ្ធផលចម្លងគឺទទេ។"
-    },
-    "keep_running_notice": {
-      "en": "The application will keep running in the system tray. To terminate the program, choose 'Exit' in the context menu of the system tray icon.",
-      "km": "កម្មវិធីនឹងបន្តដំណើរការនៅក្នុង System Tray។ ដើម្បីបញ្ចប់កម្មវិធី សូមជ្រើសរើស 'ចាកចេញ' នៅក្នុងម៉ឺនុយបរិបទនៃរូបតំណាង System Tray។"
+      "km": "លទ្ធផលបំប្លែងជាអក្សរគឺទទេ។"
     },
     "keep_running_notice_quit_button": {
       "en": "The application will keep running in the system tray. To terminate the program completely, use the 'Quit' button in the main window.",
-      "km": "កម្មវិធីនឹងបន្តដំណើរការនៅក្នុង System Tray។ ដើម្បីបញ្ចប់កម្មវិធីទាំងស្រុង សូមប្រើប៊ូតុង 'ចាកចេញ' នៅក្នុងបង្អួចមេ។"
+      "km": "កម្មវិធីនឹងបន្តដំណើរការនៅក្នុងថាសប្រព័ន្ធ។ ដើម្បីបិទកម្មវិធីទាំងស្រុង សូមប្រើប៊ូតុង 'ចាកចេញ' នៅក្នុងបង្អួចមេ។"
     }
   },
   "language_selector": {
@@ -330,13 +330,13 @@
   "ui": {
     "language": {
       "en": "UI Language",
-      "km": "ភាសានៃអ៊ីនធឺហ្វេស"
+      "km": "ភាសានៃកម្មវិធី"
     }
   },
   "dialogs": {
     "minimize_to_tray": {
       "en": "Application will minimize to the system tray.",
-      "km": "កម្មវិធីនឹងបង្រួមទៅការថាសប្រព័ន្ធ។"
+      "km": "កម្មវិធីនឹងបង្រួមទៅថាសប្រព័ន្ធ។"
     },
     "error": {
       "en": "Error",
@@ -362,7 +362,7 @@
     },
     "transcribing": {
       "en": "Transcribing...",
-      "km": "កំពុងបំប្លែងសំឡេងទៅជាអក្សរ..."
+      "km": "កំពុងបំប្លែងជាអក្សរ..."
     },
     "error": {
       "en": "Error",

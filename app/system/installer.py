@@ -193,12 +193,68 @@ def copy_uninstaller():
             target_uninstaller = os.path.join(INSTALL_DIR, "uninstall.bat")
             shutil.copy2(source_uninstaller, target_uninstaller)
             logger.info(f"Copied uninstaller to: {target_uninstaller}")
+            
+            # Register the uninstaller with Windows
+            register_uninstaller(target_uninstaller)
             return True
         else:
             logger.warning(f"Uninstaller script not found at: {source_uninstaller}")
             return False
     except Exception as e:
         logger.error(f"Error copying uninstaller: {e}")
+        return False
+
+
+def register_uninstaller(uninstaller_path):
+    """
+    Register the uninstaller with Windows Add/Remove Programs
+    
+    Args:
+        uninstaller_path: Path to the uninstaller batch file
+        
+    Returns:
+        True if successful, False otherwise
+    """
+    try:
+        # Get or create the uninstall registry key
+        key_path = r"Software\Microsoft\Windows\CurrentVersion\Uninstall\KhmerSTT"
+        
+        try:
+            key = winreg.CreateKeyEx(
+                winreg.HKEY_CURRENT_USER,
+                key_path,
+                0,
+                winreg.KEY_WRITE
+            )
+            
+            # Add uninstall information
+            winreg.SetValueEx(key, "DisplayName", 0, winreg.REG_SZ, "Khmer Speech-to-Text")
+            winreg.SetValueEx(key, "DisplayIcon", 0, winreg.REG_SZ, sys.executable)
+            winreg.SetValueEx(key, "UninstallString", 0, winreg.REG_SZ, f'"{uninstaller_path}"')
+            winreg.SetValueEx(key, "DisplayVersion", 0, winreg.REG_SZ, "1.0.0")  # Replace with actual version
+            winreg.SetValueEx(key, "Publisher", 0, winreg.REG_SZ, "Khmer STT Project")
+            winreg.SetValueEx(key, "InstallLocation", 0, winreg.REG_SZ, INSTALL_DIR)
+            winreg.SetValueEx(key, "NoModify", 0, winreg.REG_DWORD, 1)
+            winreg.SetValueEx(key, "NoRepair", 0, winreg.REG_DWORD, 1)
+            
+            # Try to get version information if possible
+            try:
+                version_file = os.path.join(INSTALL_DIR, "version.txt")
+                if os.path.exists(version_file):
+                    with open(version_file, 'r') as f:
+                        version = f.read().strip()
+                    winreg.SetValueEx(key, "DisplayVersion", 0, winreg.REG_SZ, version)
+            except Exception as e:
+                logger.warning(f"Could not read version information: {e}")
+            
+            winreg.CloseKey(key)
+            logger.info("Registered uninstaller with Windows Add/Remove Programs")
+            return True
+        except Exception as e:
+            logger.error(f"Error creating uninstall registry key: {e}")
+            return False
+    except Exception as e:
+        logger.error(f"Error registering uninstaller: {e}")
         return False
 
 

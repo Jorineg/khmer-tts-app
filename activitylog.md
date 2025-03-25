@@ -187,6 +187,23 @@
 - Cleaner code with less string manipulation for mixed content
 
 ## March 25, 2025
+### Identified text size issue with Khmer characters in UI
+- Documented an issue where Khmer text appears too small and unreadable on some screens
+- The problem appears to be related to Qt font size units not being optimized for non-Latin scripts
+- Added this to the backlog as item #15 with several proposed approaches to fix
+- This will require testing different font sizing approaches to find the best solution for Khmer text
+- Files changed: `backlog.md`
+
+## March 25, 2025
+### Fixed text size issue for Khmer characters (backlog task #15)
+- Improved text readability for Khmer characters on screens with different resolutions
+- Changed font size specifications from pixel units to point units (pt) in the application stylesheet
+- Added explicit font-size: 10pt to all UI elements in the stylesheet for better cross-resolution display
+- Changed the status label in the overlay window to use pointSize() instead of direct pixel size
+- These changes ensure consistent text sizing across different screen resolutions
+- Files changed: `app/gui/styles/app_stylesheet.py`, `app/gui/overlay.py`
+
+## March 25, 2025
 ### Fixed missing translation key and typo in overview tab
 - Added missing "shortcut" translation key in `app/i18n/strings.json` that was causing warning: "Translation key not found: overview_tab.shortcut, error: 'shortcut'"
 - Fixed typo in the overview tab title from "Spech To Text" to "Speech To Text" in `app/gui/tabs/overview_tab.py`
@@ -294,3 +311,11 @@
 - Files changed: 
   - app/gui/tabs/api_keys_tab.py
   - app/settings/settings_manager.py
+
+## March 25, 2025
+### Fixed uninstaller batch file bundling and Windows uninstaller registration
+- Modified `.github/workflows/build.yml` to include uninstall.bat in the PyInstaller bundle
+- Enhanced `app/system/installer.py` to register the uninstaller with Windows Add/Remove Programs
+- Added `register_uninstaller()` function to create proper registry entries for uninstallation
+- This ensures the uninstaller script is available in the packaged executable and appears in Windows' Add/Remove Programs
+- Files changed: `.github/workflows/build.yml`, `app/system/installer.py`

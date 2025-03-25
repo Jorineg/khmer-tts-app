@@ -41,3 +41,9 @@ NOTE: The uninstaller should be a standalone batch or PowerShell script that an 
 13. okay button on x app close is solid and doesnt match active hide button.... (i like this as main button)
 
 14. "Ready" status text is not immedieatly translated on gui langauge change as other strings. But only after app restart. same for red error box in overview if api key for selected model is not set.
+
+15. Text size issue with Khmer characters in the UI. On some screens, Khmer text appears too small and is unreadable, while English text renders properly. This may be because the default Qt font size units are not optimized for non-Latin scripts. Implement a solution to:
+    - Identify screens where this issue occurs (mainly the overlay window and potentially others)
+    - Create specific font size adjustments for Khmer language when it's selected
+    - Consider using a larger default font size for Khmer throughout the application
+    - Test with different Qt font size units (pixels, points, etc.) to find the most consistent rendering

@@ -80,7 +80,10 @@ class OverlayWidget(QWidget):
         
         # Status label
         self.status_label = QLabel("Idle")
-        self.status_label.setFont(QFont("Segoe UI", 10, QFont.Bold))
+        font = QFont("Segoe UI")
+        font.setPointSize(10)  
+        font.setBold(True)
+        self.status_label.setFont(font)
         status_layout.addWidget(self.status_label)
         
         # Add status layout to container

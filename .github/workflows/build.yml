@@ -46,7 +46,7 @@ jobs:
       
     - name: Build with PyInstaller
       run: |
-        pyinstaller --clean --icon=resources/icon.ico --add-data="resources;resources" --add-data="app/i18n;app/i18n" --hidden-import=keyring.backends.Windows --hidden-import=pynput.keyboard._win32 --hidden-import=pynput.mouse._win32 --hidden-import=google.generativeai --hidden-import=elevenlabs --collect-all=pynput --collect-all=elevenlabs --collect-all=pyaudio --collect-all=keyring --collect-all=google.generativeai --onefile --noconsole --name="Khmer STT" main.py
+        pyinstaller --clean --icon=resources/icon.ico --add-data="resources;resources" --add-data="app/i18n;app/i18n" --add-data="uninstall.bat;." --hidden-import=keyring.backends.Windows --hidden-import=pynput.keyboard._win32 --hidden-import=pynput.mouse._win32 --hidden-import=google.generativeai --hidden-import=elevenlabs --collect-all=pynput --collect-all=elevenlabs --collect-all=pyaudio --collect-all=keyring --collect-all=google.generativeai --onefile --noconsole --name="Khmer STT" main.py
         
     # Fix for tzdata missing warning
     - name: Add missing imports
