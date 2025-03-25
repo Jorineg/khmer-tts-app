@@ -21,9 +21,17 @@ Main feature:
  - audtostart option
  - single instance detection
 
+When I am talking about a language selector be carful to understand what I mean, because there are two seperate things: there is a language selector for the language of the spoken language that is getting send to the transcription model (This will be "transcription language selection") as an api parameter. there are many langaues to choose from here. The second thing is that the whole gui is bilingual. You can switch between english and khmer. this is the second language selector ("gui language selection") and completely independet from first one.
+
 
  for any request I make, it is very helpful if you try to find all files that might be relevant and read them.
  In full! most mistakes you make or issues you try to fix but can't are because you don't fully understand the context and how things are interacting and supposed to work. Don't just assume. Check your assumptions.
 
 
-हेलो हेलो वन टू थ्री वन टू थ्री।
+there is a file called "activitylog.md" in root of project. 
+Please write a brief update about any new feature or a fixed bug to this document. Include the names of the most important files that were changed.
+Also check this document everytime to see what happened before. This might give you valuable insights. Because a bug might be caused by most recent changes ans so on.
+
+There is also "backlog.md" in root of project. This is all current things to work on.
+DO NOT START WORKING ON THESE ON YOUR OWN. But if I reference one of the "tasks" check which the desctiption there and do only this one.
+You can add add additional information to the tasks if you found something that is not immediatly clear from the description and could be helpful for working on this task in the future. But do not remove or change the original description.

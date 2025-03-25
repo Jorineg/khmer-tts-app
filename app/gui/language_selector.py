@@ -17,19 +17,20 @@ class LanguageSelector(QWidget):
     
     def __init__(self, parent=None, translation_manager=None):
         """
-        Initialize the language selector widget
+        Initialize the language selector.
         
         Args:
             parent: Parent widget
-            translation_manager: Translation manager for UI strings
+            translation_manager: Translation manager for UI strings (deprecated - singleton instance used instead)
         """
         super().__init__(parent)
-        self.translation_manager = translation_manager
-        self.current_language = "en"  # Default language
         
-        # Set current language from translation manager if available
-        if self.translation_manager:
-            self.current_language = self.translation_manager.get_current_language()
+        # Always use singleton instance
+        from ..i18n.translation_manager import translation_manager as tm_singleton
+        self.translation_manager = tm_singleton  # Always use the singleton instance
+        logger.info(f"LanguageSelector using singleton TranslationManager instance with language: {self.translation_manager.current_language}")
+        
+        self.current_language = self.translation_manager.get_current_language()
             
         self.setup_ui()
         self.update_button_styles()
@@ -62,8 +63,8 @@ class LanguageSelector(QWidget):
         layout.addWidget(self.separator)
         layout.addWidget(self.km_button)
         
-        # Add stretch to push the controls to the right
-        layout.addStretch(1)
+        # Remove the stretch that pushed buttons to right - we want them aligned left now
+        # since the selector is on the left side of the window
         
         self.setLayout(layout)
         
@@ -135,19 +136,25 @@ class LanguageSelector(QWidget):
     
     def on_language_button_clicked(self, language_code):
         """Handle language button click"""
+        logger.info(f"Language button clicked: {language_code}, current: {self.current_language}")
         if language_code == self.current_language:
+            logger.info("No change needed - same language")
             return
             
         self.current_language = language_code
         
         # Update translation manager if available
         if self.translation_manager:
+            logger.info(f"Setting language in translation manager to {language_code}")
             self.translation_manager.set_language(language_code)
+        else:
+            logger.warning("Translation manager not available")
         
         # Update button styles
         self.update_button_styles()
         
         # Emit signal with new language
+        logger.info(f"Emitting languageChanged signal with {language_code}")
         self.languageChanged.emit(language_code)
     
     def update_language(self):
@@ -167,3 +174,8 @@ class LanguageSelector(QWidget):
             
         self.current_language = lang_code
         self.update_button_styles()
+        
+        # Also update the translation manager when setting language from settings
+        if self.translation_manager and self.translation_manager.get_current_language() != lang_code:
+            logger.info(f"Setting TranslationManager language to {lang_code} from set_language()")
+            self.translation_manager.set_language(lang_code)

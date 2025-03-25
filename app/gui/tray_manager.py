@@ -3,25 +3,25 @@ System tray icon manager
 """
 
 import logging
-from PyQt5.QtWidgets import QSystemTrayIcon, QMenu, QAction
+from PyQt5.QtWidgets import QSystemTrayIcon, QMenu
+
+from ..i18n.translation_manager import translation_manager
+from .widgets import TranslatableQAction
 
 logger = logging.getLogger(__name__)
 
 class TrayManager:
     """Manages the system tray icon and menu"""
     
-    def __init__(self, parent, icon, translation_manager):
+    def __init__(self, parent, icon):
         """
         Initialize the tray manager
         
         Args:
             parent: Parent window that owns the tray icon
             icon: Icon to use for the tray
-            translation_manager: Translation manager for localized strings
         """
-        self.parent = parent
-        self.translation_manager = translation_manager
-        
+        self.parent = parent        
         # Create the tray icon
         self.tray_icon = QSystemTrayIcon(icon, parent)
         self.update_tooltip()
@@ -40,7 +40,7 @@ class TrayManager:
         tray_menu = QMenu(self.parent)
         
         # Open action
-        self.open_action = QAction(self.translation_manager.get_string("buttons.open"), self.parent)
+        self.open_action = TranslatableQAction("<<buttons.open>>", self.parent)
         self.open_action.triggered.connect(self.parent.show_main_window)
         tray_menu.addAction(self.open_action)
         
@@ -48,21 +48,25 @@ class TrayManager:
         tray_menu.addSeparator()
         
         # Exit action
-        self.exit_action = QAction(self.translation_manager.get_string("buttons.exit"), self.parent)
+        self.exit_action = TranslatableQAction("<<buttons.exit>>", self.parent)
         self.exit_action.triggered.connect(self.parent.close_application)
         tray_menu.addAction(self.exit_action)
         
         # Set the tray menu
         self.tray_icon.setContextMenu(tray_menu)
     
+    def update_language(self):
+        """Update all translatable elements in the tray manager"""
+        self.update_menu_text()
+        self.update_tooltip()
+    
     def update_menu_text(self):
         """Update menu text with current language"""
-        self.open_action.setText(self.translation_manager.get_string("buttons.open"))
-        self.exit_action.setText(self.translation_manager.get_string("buttons.exit"))
+        # No need to update menu text as TranslatableQAction handles it automatically
     
     def update_tooltip(self):
         """Update tray tooltip with current language"""
-        self.tray_icon.setToolTip(self.translation_manager.get_string("tray_tooltip"))
+        self.tray_icon.setToolTip(translation_manager.get_string("tray_tooltip"))
     
     def tray_icon_activated(self, reason):
         """

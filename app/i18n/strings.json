@@ -1,11 +1,11 @@
 {
   "app_name": {
-    "en": "Khmer STT",
-    "km": "Khmer STT"
+    "en": "Khmer Speech-To-Text",
+    "km": "កម្មវិធីបំប្លែងសំឡេងទៅជាអក្សរខ្មែរ"
   },
   "window_title": {
-    "en": "Khmer STT",
-    "km": "Khmer STT"
+    "en": "Khmer Speech-To-Text",
+    "km": "Khmer Speech-To-Text"
   },
   "tray_tooltip": {
     "en": "Khmer STT - Speech to Text",
@@ -31,8 +31,12 @@
   },
   "overview_tab": {
     "title": {
-      "en": "Khmer Speech-to-Text",
+      "en": "Khmer Speech-To-Text",
       "km": "កម្មវិធីបំប្លែងសំឡេងទៅជាអក្សរខ្មែរ"
+    },
+    "shortcut": {
+      "en": "Current shortcut:",
+      "km": "ផ្លូវកាត់បច្ចុប្បន្ន៖"
     },
     "app_info": {
       "en": "Application Information",
@@ -272,6 +276,30 @@
       "en": "Error during transcription: {error}",
       "km": "មានបញ្ហាក្នុងអំឡុងពេលចម្លង៖ {error}"
     },
+    "missing_api_key_title": {
+      "en": "API Key Required",
+      "km": "តម្រូវឱ្យមានកូនសោ API"
+    },
+    "missing_api_key_error": {
+      "en": "Transcription failed because no API key is available for the selected model ({model_name}). Please add an API key in the API Keys tab in Settings.",
+      "km": "ការចម្លងបានបរាជ័យព្រោះគ្មានកូនសោ API សម្រាប់គំរូដែលបានជ្រើសរើស ({model_name})។ សូមបន្ថែមកូនសោ API នៅក្នុងផ្ទាំងកូនសោ API ក្នុងការកំណត់។"
+    },
+    "network_error_title": {
+      "en": "Network Connection Error",
+      "km": "កំហុសក្នុងការតភ្ជាប់បណ្តាញ"
+    },
+    "network_error_message": {
+      "en": "Transcription failed because there is no internet connection. Please check your network connection and try again.",
+      "km": "ការចម្លងបានបរាជ័យព្រោះគ្មានការតភ្ជាប់អ៊ីនធឺណិត។ សូមពិនិត្យការតភ្ជាប់បណ្តាញរបស់អ្នក ហើយព្យាយាមម្តងទៀត។"
+    },
+    "api_error_title": {
+      "en": "API Service Error",
+      "km": "កំហុសក្នុងសេវាកម្ម API"
+    },
+    "api_error_message": {
+      "en": "Transcription failed due to a service error with {model_name}. This could be due to server issues or you may have reached your free API usage limit.",
+      "km": "ការចម្លងបានបរាជ័យដោយសារកំហុសក្នុងសេវាកម្មជាមួយ {model_name}។ នេះអាចបណ្តាលមកពីបញ្ហាម៉ាស៊ីនមេ ឬអ្នកអាចបានដល់ដែនកំណត់ប្រើប្រាស់ API ដោយឥតគិតថ្លៃរបស់អ្នក។"
+    },
     "transcription_failed_title": {
       "en": "Transcription Failed",
       "km": "ការចម្លងបរាជ័យ"
@@ -339,6 +367,10 @@
     "error": {
       "en": "Error",
       "km": "កំហុស"
+    },
+    "no_api_key": {
+      "en": "No API key for {model_name}",
+      "km": "គ្មានកូនសោ API សម្រាប់ {model_name}"
     }
   }
 }

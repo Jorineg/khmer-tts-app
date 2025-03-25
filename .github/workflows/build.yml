@@ -46,127 +46,14 @@ jobs:
       
     - name: Build with PyInstaller
       run: |
-        pyinstaller --clean --icon=resources/icon.ico --add-data="resources;resources" --hidden-import=keyring.backends.Windows --hidden-import=pynput.keyboard._win32 --hidden-import=pynput.mouse._win32 --hidden-import=google.generativeai --hidden-import=elevenlabs --collect-all=pynput --collect-all=elevenlabs --collect-all=pyaudio --collect-all=keyring --collect-all=google.generativeai --onefile --noconsole --name="Khmer STT" main.py
+        pyinstaller --clean --icon=resources/icon.ico --add-data="resources;resources" --add-data="app/i18n;app/i18n" --hidden-import=keyring.backends.Windows --hidden-import=pynput.keyboard._win32 --hidden-import=pynput.mouse._win32 --hidden-import=google.generativeai --hidden-import=elevenlabs --collect-all=pynput --collect-all=elevenlabs --collect-all=pyaudio --collect-all=keyring --collect-all=google.generativeai --onefile --noconsole --name="Khmer STT" main.py
         
     # Fix for tzdata missing warning
     - name: Add missing imports
       run: |
         pip install tzdata
         
-    # Create a simple installer batch script
-    - name: Create simple installer batch script
-      run: |
-        $installScript = @"
-        @echo off
-        echo Installing Khmer Speech-to-Text...
-
-        :: Check for administrator privileges
-        net session >nul 2>&1
-        if %errorlevel% neq 0 (
-            echo This installer requires administrator privileges.
-            echo Please right-click on this batch file and select "Run as administrator".
-            pause
-            exit /b 1
-        )
-        
-        :: Set installation directory
-        set INSTALL_DIR=%PROGRAMFILES%\KhmerSTT
-        
-        echo Installation directory: %INSTALL_DIR%
-        
-        :: Create installation directory if it doesn't exist
-        if not exist "%INSTALL_DIR%" (
-            echo Creating installation directory...
-            mkdir "%INSTALL_DIR%"
-        )
-        
-        echo Copying files...
-        copy /Y "Khmer STT.exe" "%INSTALL_DIR%\Khmer STT.exe"
-        copy /Y "LICENSE.txt" "%INSTALL_DIR%\LICENSE.txt"
-        
-        :: Create application metadata to hide .exe extension in task manager
-        echo Creating application metadata...
-        echo [.ShellClassInfo] > "%INSTALL_DIR%\desktop.ini"
-        echo ConfirmFileOp=0 >> "%INSTALL_DIR%\desktop.ini"
-        echo NoSharing=1 >> "%INSTALL_DIR%\desktop.ini"
-        echo IconResource=Khmer STT.exe,0 >> "%INSTALL_DIR%\desktop.ini"
-        echo [ViewState] >> "%INSTALL_DIR%\desktop.ini"
-        echo Mode= >> "%INSTALL_DIR%\desktop.ini"
-        echo Vid= >> "%INSTALL_DIR%\desktop.ini"
-        echo FolderType=Generic >> "%INSTALL_DIR%\desktop.ini"
-        attrib +s +h "%INSTALL_DIR%\desktop.ini"
-        attrib +s "%INSTALL_DIR%"
-        
-        echo Creating shortcuts...
-        powershell -Command "$WshShell = New-Object -ComObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut('%USERPROFILE%\Desktop\Khmer STT.lnk'); $Shortcut.TargetPath = '%INSTALL_DIR%\Khmer STT.exe'; $Shortcut.Description = 'Khmer Speech-to-Text Application'; $Shortcut.Save()"
-        powershell -Command "$WshShell = New-Object -ComObject WScript.Shell; $Shortcut = $WshShell.CreateShortcut('%APPDATA%\Microsoft\Windows\Start Menu\Programs\Khmer STT.lnk'); $Shortcut.TargetPath = '%INSTALL_DIR%\Khmer STT.exe'; $Shortcut.Description = 'Khmer Speech-to-Text Application'; $Shortcut.Save()"
-        
-        echo.
-        echo Installation complete!
-        echo The application is now installed in: %INSTALL_DIR%
-        echo Shortcuts have been created on your desktop and in the Start Menu.
-        echo.
-        pause
-        "@
-        Set-Content -Path "install.bat" -Value $installScript
-        
-        # Create README.txt for the package
-        $readmeContent = @"
-        Khmer Speech-to-Text Application
-        ================================
-        
-        This application allows you to transcribe Khmer speech to text using 
-        keyboard shortcuts. It can be used in any application where you can 
-        enter text.
-        
-        Installation:
-        1. Right-click on install.bat and select "Run as administrator"
-        2. Follow the prompts to complete the installation
-        
-        Usage:
-        - Press and HOLD Ctrl+Alt+Space (default shortcut) while speaking
-        - RELEASE the shortcut when done speaking to start transcription
-        - The transcribed text will be inserted at your cursor position
-        - Access settings through the system tray icon
-        
-        Important Notes:
-        - You must add at least one API key in the settings to use the application
-        - Gemini Flash is generally faster (1500 free requests per day)
-        - ElevenLabs provides better accuracy for Khmer language (2.5 hours free audio per month)
-        - During recording and transcription, a small overlay will appear on screen
-        
-        The application will show a settings window on first launch.
-        You can configure it to start automatically with Windows.
-        
-        For more information, visit the project repository.
-        "@
-        Set-Content -Path "README.txt" -Value $readmeContent -Encoding UTF8
-        
-        # Create LICENSE.txt for the package if it doesn't exist
-        $licenseContent = Get-Content -Path "LICENSE.txt" -Raw -ErrorAction SilentlyContinue
-        if (-not $licenseContent) {
-            $licenseContent = @"
-        MIT License
-
-        Copyright (c) 2025 Khmer STT Team
-
-        Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-        The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-        "@
-            Set-Content -Path "LICENSE.txt" -Value $licenseContent
-        }
-        
-        # Package files individually to avoid nested zip
-        mkdir -Force release_package
-        copy "dist\Khmer STT.exe" release_package\
-        copy "LICENSE.txt" release_package\
-        copy "README.txt" release_package\
-        copy "install.bat" release_package\
-        
-    # Read version from version.txt or use build number for testing
+    # Determine version
     - name: Determine version
       id: get_version
       run: |
@@ -205,10 +92,10 @@ jobs:
           echo "Creating test build: $version"
         }
       
-    # Create zip file after version is determined
-    - name: Create Release Zip
+    # Copy the EXE to a location with version in the filename
+    - name: Prepare artifact
       run: |
-        Compress-Archive -Path "release_package\*" -DestinationPath "KhmerSTT-${{ steps.get_version.outputs.version }}.zip" -Force
+        copy "dist\Khmer STT.exe" "Khmer STT-${{ steps.get_version.outputs.version }}.exe"
         
     # Upload artifacts to Actions
     - name: Upload artifacts
@@ -216,7 +103,7 @@ jobs:
       with:
         name: khmer-stt-release-files
         path: |
-          KhmerSTT-${{ steps.get_version.outputs.version }}.zip
+          Khmer STT-${{ steps.get_version.outputs.version }}.exe
 
     # Create GitHub Release (if this is a release or tag)
     - name: Create Release
@@ -228,5 +115,5 @@ jobs:
         prerelease: ${{ github.event.inputs.release_type != 'release' }}
         tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || format('v{0}', steps.get_version.outputs.version) }}
         files: |
-          KhmerSTT-${{ steps.get_version.outputs.version }}.zip
+          Khmer STT-${{ steps.get_version.outputs.version }}.exe
         fail_on_unmatched_files: true

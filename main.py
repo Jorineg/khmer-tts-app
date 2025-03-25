@@ -17,6 +17,9 @@ from app.gui.main_window import MainWindow
 from app.system.keyboard_listener import start_keyboard_listener
 from app.settings.settings_manager import SettingsManager
 
+# Import installer module
+from app.system.installer import handle_first_run
+
 # Windows API constants for window activation
 SW_RESTORE = 9
 SW_SHOW = 5
@@ -40,7 +43,7 @@ SIGNAL_FILE = os.path.join(app_data_dir, 'app.signal')
 
 # Set up logging
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     handlers=[
         logging.FileHandler(log_file),
@@ -233,6 +236,11 @@ def main():
         
         # Set up global exception handler
         sys.excepthook = handle_exception
+        
+        # Handle first run and installation if needed
+        if not handle_first_run():
+            logger.info("Installation process initiated. Exiting current instance.")
+            return 0
         
         # Acquire lock file
         lock_handle, is_first_instance = acquire_lock()

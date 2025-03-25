@@ -168,6 +168,13 @@ def start_keyboard_listener(main_window):
     shortcut = main_window.settings_manager.get_setting("shortcut")
     logger.info(f"Starting keyboard listener with shortcut: {shortcut}")
     
+    # Make sure we have a valid shortcut - use default if none is set
+    if not shortcut:
+        shortcut = "ctrl+alt+space"
+        logger.warning(f"No shortcut found in settings, using default: {shortcut}")
+        # Save the default back to settings to ensure it's there next time
+        main_window.settings_manager.set_setting("shortcut", shortcut)
+    
     # Create and start keyboard listener thread
     keyboard_thread = KeyboardThread(shortcut)
     

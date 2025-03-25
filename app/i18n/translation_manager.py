@@ -1,128 +1,212 @@
 """
-Translation manager for the application
+Translation manager for the application.
+Handles loading and accessing UI strings in English and Khmer.
 """
 
 import os
 import json
 import logging
+import sys
+from PyQt5.QtCore import QObject, pyqtSignal
 
 logger = logging.getLogger(__name__)
 
-class TranslationManager:
-    """Manager for handling translations in the application"""
+# Singleton instance
+_instance = None
+
+class TranslationManager(QObject):
+    """Manager for translations between English and Khmer"""
     
-    def __init__(self, settings_manager=None):
-        """
-        Initialize the translation manager
-        
-        Args:
-            settings_manager: Optional SettingsManager instance to save/load UI language preference
-        """
-        self.settings_manager = settings_manager
-        self.strings = {}
-        self.current_language = "en"  # Default language
-        
-        # Load translations from file
-        self.load_translations()
-        
-        # Set initial language from settings if available
-        if settings_manager:
-            self.current_language = settings_manager.get_setting("ui_language")
+    # Signal emitted when the language changes
+    language_changed = pyqtSignal(str)
     
-    def load_translations(self):
-        """Load translations from the JSON file"""
+    @staticmethod
+    def get_instance():
+        """Get or create the singleton instance of TranslationManager"""
+        global _instance
+        if _instance is None:
+            logger.info("Creating singleton TranslationManager instance")
+            _instance = TranslationManager()
+        return _instance
+    
+    def __init__(self):
+        """Initialize the translation manager with default language set to English"""
+        super().__init__()
+        
+        # Initialize default values
+        self.current_language = "en"
+        self.strings = {"en": {}, "km": {}}
+        
+        # Load the translation strings from JSON file
+        self._load_strings()
+        
+        logger.info("TranslationManager instance initialized")
+    
+    def _load_strings(self):
+        """Load translation strings from JSON file"""
         try:
-            # Get the path to the strings.json file
-            strings_file = os.path.join(os.path.dirname(__file__), "strings.json")
+            # Get the base path (assumes this file is in app/i18n/)
+            base_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+            strings_path = os.path.join(base_path, "app", "i18n", "strings.json")
             
-            # Check if file exists
-            if not os.path.exists(strings_file):
-                logger.error(f"Translation file not found: {strings_file}")
-                return
-            
-            # Load the JSON data
-            with open(strings_file, 'r', encoding='utf-8') as f:
+            # Try to load the strings file
+            with open(strings_path, "r", encoding="utf-8") as f:
                 self.strings = json.load(f)
-                
-            logger.info(f"Translations loaded successfully from {strings_file}")
-            
+                logger.info(f"Loaded translations from {strings_path}")
         except Exception as e:
-            logger.error(f"Error loading translations: {str(e)}")
-    
-    def get_string(self, key, default=None, **kwargs):
-        """
-        Get a translated string by key
-        
-        Args:
-            key: The string key (can be nested using dot notation, e.g., 'tabs.overview')
-            default: Default value if key not found
-            **kwargs: Format parameters for string placeholders
-            
-        Returns:
-            The translated string
-        """
-        try:
-            # Split the key by dots for nested access
-            parts = key.split('.')
-            value = self.strings
-            
-            # Navigate through the nested dictionary
-            for part in parts:
-                value = value[part]
-            
-            # Get the translation for the current language
-            translation = value.get(self.current_language)
-            
-            # Fallback to English if translation not available
-            if translation is None:
-                translation = value.get("en", default)
-                
-            # Apply format parameters if any
-            if kwargs and translation:
-                translation = translation.format(**kwargs)
-                
-            return translation or default
-            
-        except (KeyError, AttributeError) as e:
-            logger.warning(f"Translation key not found: {key}, error: {str(e)}")
-            return default or key
+            logger.error(f"Failed to load translations: {e}")
+            # Set a default empty dictionary to prevent errors
+            self.strings = {"en": {}, "km": {}}
     
     def set_language(self, language_code):
+        """Set the current language (en or km)"""
+        logger.info(f"TranslationManager.set_language called with language_code: {language_code}")
+        
+        # Only allow English or Khmer
+        if language_code not in ["en", "km"]:
+            logger.warning(f"Language {language_code} not supported, falling back to English")
+            language_code = "en"
+        
+        # Set the current language
+        prev_language = self.current_language
+        self.current_language = language_code
+        logger.info(f"Language changed from {prev_language} to: {language_code}")
+        
+        # Emit the language changed signal
+        # The update_all_translatable_widgets function is connected to this signal
+        # in translatable.py and will handle the updates automatically
+        logger.info(f"About to emit language_changed signal with {language_code}")
+        self.language_changed.emit(language_code)
+        logger.info("Signal emitted")
+    
+    def get_string(self, key, **kwargs):
         """
-        Set the current language
+        Get a translated string.
         
         Args:
-            language_code: The language code to set (e.g., 'en', 'km')
+            key: The string key to translate
+            **kwargs: Optional parameters for string formatting
             
         Returns:
-            True if successful, False otherwise
+            The translated string or the key itself if not found
         """
-        if language_code in ["en", "km"]:
-            self.current_language = language_code
-            
-            # Save language preference if settings manager available
-            if self.settings_manager:
-                self.settings_manager.set_setting("ui_language", language_code)
-                self.settings_manager.save()
+        language = self.current_language or "en"
                 
-            logger.info(f"Language set to: {language_code}")
-            return True
+        # The JSON structure has keys at the top level, then languages nested within each key
+        parts = key.split(".")
+        current = self.strings
+        
+        # Navigate to the key in the nested dictionary structure
+        for part in parts:
+            if isinstance(current, dict) and part in current:
+                current = current[part]
+            else:
+                # Key not found
+                logger.warning(f"Key {key} not found in translation strings")
+                return key
+        
+        # Now we have the language dictionary, get the right language
+        if isinstance(current, dict) and language in current:
+            result = current[language]
+            
+            # Format the string if needed
+            if isinstance(result, str) and kwargs:
+                try:
+                    return result.format(**kwargs)
+                except KeyError as e:
+                    logger.warning(f"Missing format key in translation: {e}")
+                    return result
+            return result
+        elif isinstance(current, dict) and "en" in current:
+            # Fall back to English if the requested language isn't available for this key
+            logger.warning(f"Language {language} not found for key {key}, falling back to English")
+            result = current["en"]
+            
+            # Format the string if needed
+            if isinstance(result, str) and kwargs:
+                try:
+                    return result.format(**kwargs)
+                except KeyError as e:
+                    logger.warning(f"Missing format key in translation: {e}")
+                    return result
+            return result
         else:
-            logger.warning(f"Unsupported language code: {language_code}")
-            return False
+            logger.warning(f"No translation available for key {key}")
+            return key
+        
+    def get_template_string(self, template_string, **kwargs):
+        """
+        Get a translated string from a template containing {key} placeholders.
+        
+        Args:
+            template_string: A string with translation keys in curly braces
+                             For example: "Hello {greeting.world}! How are {greeting.you}?"
+            **kwargs: Optional parameters for string formatting
+            
+        Returns:
+            The template with all translation keys replaced with their translations
+        """
+        # Find all translation keys in the template
+        import re
+        keys = re.findall(r'\{([^{}]+)\}', template_string)
+        
+        # Replace each key with its translation
+        result = template_string
+        for key in keys:
+            if '.' in key:  # Only treat as translation key if it contains a dot
+                translation = self.get_string(key, **kwargs)
+                result = result.replace(f"{{{key}}}", translation)
+            # If no dot, it's probably a normal format key, leave it alone
+        
+        # Process any remaining format strings (like {name} from kwargs)
+        if kwargs:
+            try:
+                result = result.format(**kwargs)
+            except KeyError as e:
+                logger.warning(f"Missing format key in template: {e}")
+        
+        return result
+    
+    def has_string(self, key):
+        """
+        Check if a string key exists in the translation dictionary
+        
+        Args:
+            key: The string key to check
+            
+        Returns:
+            True if the key exists, False otherwise
+        """
+        parts = key.split(".")
+        current = self.strings
+        
+        # Navigate to the key in the nested dictionary structure
+        for part in parts:
+            if isinstance(current, dict) and part in current:
+                current = current[part]
+            else:
+                return False
+        
+        # Check if it's a dictionary with language keys
+        return isinstance(current, dict) and (
+            self.current_language in current or "en" in current
+        )
     
     def get_current_language(self):
-        """Get the current language code"""
+        """Get the current language code (en or km)"""
         return self.current_language
     
     def get_available_languages(self):
-        """
-        Get a dictionary of available languages
-        
-        Returns:
-            Dictionary with language names as keys and codes as values
-        """
-        return {
-            "English": "en",
-            "ខ្មែរ": "km"  # Khmer
+        """Get the available languages (always en and km)"""
+        return ["en", "km"]
+    
+    def get_language_name(self, language_code):
+        """Get the display name of a language"""
+        language_names = {
+            "en": "English",
+            "km": "ភាសាខ្មែរ",  # Khmer
         }
+        return language_names.get(language_code, language_code)
+
+# Create a single instance to be imported by other modules
+translation_manager = TranslationManager.get_instance()

@@ -46,6 +46,9 @@ class SettingsManager:
         
         # Sync registry with settings
         self.sync_autostart_with_setting()
+        
+        # Debug - log all settings at startup
+        self._log_current_settings()
     
     def _initialize_settings(self):
         """Initialize settings with default values if they don't exist"""
@@ -66,12 +69,18 @@ class SettingsManager:
         """
         if default is None and key in self.defaults:
             default = self.defaults[key]
-            
+        
         value = self.settings.value(key, default)
         
         # Convert string representations of bool back to bool
         if isinstance(default, bool) and isinstance(value, str):
             return value.lower() in ('true', 'yes', '1')
+        
+        # Special handling for shortcut - ensure it's a string
+        if key == "shortcut" and value:
+            value_str = str(value)
+            logger.debug(f"Retrieved shortcut: {value_str} (type: {type(value)})")
+            return value_str
             
         return value
     
@@ -83,8 +92,15 @@ class SettingsManager:
             key: Setting key
             value: Setting value
         """
+        # For shortcut, do special handling to ensure proper storage format
+        if key == "shortcut" and value:
+            # Ensure shortcut is properly formatted for storage
+            logger.debug(f"Storing shortcut value: {value}")
+            
         self.settings.setValue(key, value)
+        # Ensure settings are immediately written to storage
         self.settings.sync()
+        logger.debug(f"Set setting {key} = {value} (type: {type(value)})")
         
         # Update autostart if this setting changed
         if key == "run_on_startup":
@@ -243,3 +259,85 @@ class SettingsManager:
         self.settings.sync()
         logger.info("All settings have been saved")
         return True
+        
+    def update_global_shortcut(self, shortcut, callback=None):
+        """
+        Update the global shortcut setting and notify any listeners
+        
+        Args:
+            shortcut: The new shortcut key combination
+            callback: Optional callback to update the shortcut in the keyboard listener
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            # Save the shortcut setting
+            self.set_setting("shortcut", shortcut)
+            logger.info(f"Updated global shortcut to: {shortcut}")
+            
+            # Call the callback if provided
+            if callback and callable(callback):
+                callback(shortcut)
+                
+            return True
+        except Exception as e:
+            logger.error(f"Error updating global shortcut: {str(e)}")
+            return False
+    
+    def update_transcription_model(self, model_name, callback=None):
+        """
+        Update the transcription model setting and notify any listeners
+        
+        Args:
+            model_name: The name of the transcription model to use
+            callback: Optional callback to update the transcription manager
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            # Save the model setting
+            self.set_setting("default_model", model_name)
+            logger.info(f"Updated transcription model to: {model_name}")
+            
+            # Call the callback if provided
+            if callback and callable(callback):
+                callback(model_name)
+                
+            return True
+        except Exception as e:
+            logger.error(f"Error updating transcription model: {str(e)}")
+            return False
+            
+    def update_language(self, language_code, callback=None):
+        """
+        Update the language setting and notify any listeners
+        
+        Args:
+            language_code: The ISO code for the language
+            callback: Optional callback to update the transcription manager
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            # Save the language setting
+            self.set_setting("language", language_code)
+            logger.info(f"Updated language to: {language_code}")
+            
+            # Call the callback if provided
+            if callback and callable(callback):
+                callback(language_code)
+                
+            return True
+        except Exception as e:
+            logger.error(f"Error updating language: {str(e)}")
+            return False
+
+    def _log_current_settings(self):
+        """Log all current settings for debugging"""
+        logger.debug("Current settings:")
+        for key in self.defaults.keys():
+            value = self.get_setting(key)
+            logger.debug(f"  {key}: {value} (type: {type(value)})")
