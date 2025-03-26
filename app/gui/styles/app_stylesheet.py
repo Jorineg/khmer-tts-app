@@ -2,9 +2,7 @@
 Application stylesheet definitions
 """
 
-import os
 from app.utils.resource_path import get_resource_url
-from PyQt5.QtWidgets import QApplication
 
 def get_main_stylesheet():
     """
@@ -15,11 +13,11 @@ def get_main_stylesheet():
     """
     # Get the URL for the arrow down image
     arrow_down_url = get_resource_url('resources/arrow_down.png')
-    
+
     return """
         QMainWindow, QDialog {
             background-color: #f5f5f7;
-            font-family: 'Segoe UI', Arial, sans-serif;
+            font-family: 'Noto Sans Khmer';
             font-size: 10pt;
         }
         
@@ -30,6 +28,7 @@ def get_main_stylesheet():
             padding: 8px 16px;
             border-radius: 4px;
             font-weight: 500;
+            font-family: 'Noto Sans Khmer';
             font-size: 10pt;
         }
         
@@ -56,6 +55,7 @@ def get_main_stylesheet():
             border: 1px solid #d0d0d0;
             border-bottom: none;
             min-width: 80px;
+            font-family: 'Noto Sans Khmer';
             font-size: 10pt;
         }
         
@@ -71,6 +71,7 @@ def get_main_stylesheet():
             border-radius: 5px;
             margin-top: 12px;
             padding-top: 10px;
+            font-family: 'Noto Sans Khmer';
             font-size: 10pt;
         }
         
@@ -82,6 +83,7 @@ def get_main_stylesheet():
         
         QLabel {
             color: #333333;
+            font-family: 'Noto Sans Khmer';
             font-size: 10pt;
         }
         
@@ -94,6 +96,7 @@ def get_main_stylesheet():
             selection-background-color: #3498db;
             selection-color: #ffffff;
             height: 16px;
+            font-family: 'Noto Sans Khmer';
             font-size: 10pt;
         }
         
@@ -110,7 +113,7 @@ def get_main_stylesheet():
             width: 16px;
             height: 16px;
         }
-    """ % arrow_down_url
+    """ % (arrow_down_url)
 
 
 def get_subtle_button_style():
@@ -127,6 +130,7 @@ def get_subtle_button_style():
             border: 1px solid #d0d0d0;
             padding: 8px 16px;
             border-radius: 4px;
+            font-family: 'Noto Sans Khmer';
             font-size: 10pt;
         }
         QPushButton:hover {
@@ -153,6 +157,7 @@ def get_accent_button_style():
             padding: 8px 16px;
             border-radius: 4px;
             font-weight: bold;
+            font-family: 'Noto Sans Khmer';
             font-size: 10pt;
         }
         QPushButton:hover {
@@ -164,31 +169,29 @@ def get_accent_button_style():
     """
 
 
-def get_group_box_style(color="#2980b9"):
+def get_group_box_style():
     """
     Return style for QGroupBox
     
-    Args:
-        color: Color for the group box title, default is blue
-        
     Returns:
         str: The stylesheet as a string
     """
-    return f"""
-        QGroupBox {{
+    return """
+        QGroupBox {
             font-weight: bold;
             border: 1px solid #d0d0d0;
             border-radius: 5px;
             margin-top: 12px;
             padding-top: 10px;
+            color: #2980b9;
+            font-family: 'Noto Sans Khmer';
             font-size: 10pt;
-            color: {color};
-        }}
-        QGroupBox::title {{
+        }
+        QGroupBox::title {
             subcontrol-origin: margin;
             left: 10px;
             padding: 0 5px;
-        }}
+        }
     """
 
 
@@ -206,13 +209,14 @@ def get_features_group_box_style():
             border-radius: 6px;
             margin-top: 12px;
             padding-top: 10px;
-            font-size: 10pt;
         }
         QGroupBox::title {
             subcontrol-origin: margin;
             left: 10px;
             padding: 0 5px;
             color: #2980b9;
+            font-family: 'Noto Sans Khmer';
+            font-size: 10pt;
         }
     """
 
@@ -231,6 +235,7 @@ def get_combo_box_style():
             padding: 5px;
             background-color: #ffffff;
             height: 16px;
+            font-family: 'Noto Sans Khmer';
             font-size: 10pt;
         }
         QComboBox::drop-down {
@@ -246,79 +251,90 @@ def get_combo_box_style():
 
 def get_description_label_style():
     """
-    Return style for description labels
+    Return the description label stylesheet
     
     Returns:
         str: The stylesheet as a string
     """
-    return "color: #34495e; line-height: 1.4; margin-bottom: 10px; font-size: 10pt;"
+    return "color: #34495e; line-height: 1.4; margin-bottom: 10px;"
 
 
 def get_feature_label_style():
     """
-    Return style for feature list labels
+    Return the feature label stylesheet
     
     Returns:
         str: The stylesheet as a string
     """
-    return "color: #34495e; padding-left: 5px; font-size: 10pt;"
+    return "color: #34495e; padding-left: 5px;"
 
 
 def get_note_label_style():
     """
-    Return style for note/hint labels
+    Return the note label stylesheet
     
     Returns:
         str: The stylesheet as a string
     """
-    return "font-style: italic; color: #7f8c8d; margin-top: 10px; font-size: 10pt;"
+    return "font-style: italic; color: #7f8c8d; margin-top: 10px;"
 
 
 def get_warning_label_style():
     """
-    Return style for warning/error labels
+    Return the warning label stylesheet
     
     Returns:
         str: The stylesheet as a string
     """
-    return "color: #e74c3c; font-weight: bold; background-color: #ffeeee; padding: 10px; border-radius: 5px; font-size: 10pt;"
+    return "color: #e74c3c; font-weight: bold; background-color: #ffeeee; padding: 10px; border-radius: 5px;"
 
 
 def get_label_style():
     """
-    Return style for standard labels with bold formatting
+    Return the label stylesheet
     
     Returns:
         str: The stylesheet as a string
     """
-    return "font-weight: bold; margin-right: 10px; font-size: 10pt;"
+    return "font-weight: bold; margin-right: 10px;"
 
 
 def get_checkbox_style():
     """
-    Return style for checkboxes
+    Return the checkbox stylesheet
     
     Returns:
         str: The stylesheet as a string
     """
-    return "margin-bottom: 5px; font-size: 10pt;"
+    return """
+        margin-bottom: 5px;
+        font-family: 'Noto Sans Khmer';
+        font-size: 10pt;
+    """
+
+def get_radio_button_style():
+    return """
+        margin-bottom: 5px;
+        font-family: 'Noto Sans Khmer';
+        font-size: 10pt;
+    """
 
 
 def get_link_style():
     """
-    Return style for hyperlink labels
+    Return the link stylesheet
     
     Returns:
         str: The stylesheet as a string
     """
-    return "margin-top: 5px; margin-bottom: 10px; color: #2980b9; font-size: 10pt;"
+    return "margin-top: 5px; margin-bottom: 10px; color: #2980b9;"
 
 
 def get_status_label_style():
     """
-    Return style for status labels
+    Return the status label stylesheet
     
     Returns:
         str: The stylesheet as a string
     """
-    return "color: #7f8c8d; margin-top: 5px; font-size: 10pt;"
+    return "color: #7f8c8d; margin-top: 5px;"

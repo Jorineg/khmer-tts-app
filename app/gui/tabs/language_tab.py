@@ -13,7 +13,7 @@ from ..widgets import (
 )
 from ..styles.app_stylesheet import (
     get_group_box_style, get_description_label_style,
-    get_combo_box_style, get_note_label_style
+    get_combo_box_style, get_note_label_style, get_radio_button_style
 )
 from ...i18n.translation_manager import translation_manager
 
@@ -101,7 +101,9 @@ class LanguageTab(QWidget):
         
         # Model selection
         self.model_radio_gemini = QRadioButton("Google Gemini Flash")
+        self.model_radio_gemini.setStyleSheet(get_radio_button_style())
         self.model_radio_elevenlabs = QRadioButton("ElevenLabs")
+        self.model_radio_elevenlabs.setStyleSheet(get_radio_button_style())
         
         # Connect signals
         self.model_radio_gemini.toggled.connect(self.on_model_selection_changed)

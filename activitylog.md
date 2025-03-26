@@ -203,6 +203,16 @@
 - These changes ensure consistent text sizing across different screen resolutions
 - Files changed: `app/gui/styles/app_stylesheet.py`, `app/gui/overlay.py`
 
+## March 26, 2025
+### Enhanced Khmer text rendering with bundled font support
+- Implemented a more robust solution for Khmer text rendering issues on different screens
+- Added code to load the bundled Noto Sans Khmer font from the application resources
+- Modified the stylesheet generator to use the Khmer font specifically when the UI language is set to Khmer
+- Added dynamic stylesheet updating when language is changed to ensure proper font application
+- Preserved High DPI scaling for better text rendering on high-resolution displays
+- These changes ensure consistent and readable display of Khmer text across different screen resolutions
+- Files changed: `main.py`, `app/gui/styles/app_stylesheet.py`, `app/gui/main_window.py`
+
 ## March 25, 2025
 ### Fixed missing translation key and typo in overview tab
 - Added missing "shortcut" translation key in `app/i18n/strings.json` that was causing warning: "Translation key not found: overview_tab.shortcut, error: 'shortcut'"

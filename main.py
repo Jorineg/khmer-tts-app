@@ -11,11 +11,13 @@ import time
 import errno
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import Qt, QTimer, pyqtSignal
+from PyQt5.QtGui import QFontDatabase
 
 # Import the main window implementation
 from app.gui.main_window import MainWindow
 from app.system.keyboard_listener import start_keyboard_listener
 from app.settings.settings_manager import SettingsManager
+from app.utils.resource_path import get_resource_url
 
 # Import installer module
 from app.system.installer import handle_first_run
@@ -253,8 +255,12 @@ def main():
         # High DPI support
         if hasattr(Qt, 'AA_EnableHighDpiScaling'):
             QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
+            logger.info("High DPI Scaling Enabled (AA_EnableHighDpiScaling)")
+            print("High DPI Scaling Enabled (AA_EnableHighDpiScaling)")
         if hasattr(Qt, 'AA_UseHighDpiPixmaps'):
             QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
+            logger.info("High DPI Pixmaps Enabled (AA_UseHighDpiPixmaps)")
+            print("High DPI Pixmaps Enabled (AA_UseHighDpiPixmaps)")
         
         # Create application
         app = SingleApplication(sys.argv)
@@ -264,6 +270,51 @@ def main():
         
         # Make sure to release lock on exit
         app.aboutToQuit.connect(lambda: release_lock(lock_handle))
+        
+        # Get the possibly relative path
+        relative_font_path = get_resource_url('resources/fonts/NotoSansKhmer-Regular.ttf')
+        # relative_font_path = get_resource_url('resources/fonts/Roboto-Regular.ttf')
+        logger.info(f"Relative font path from get_resource_url: '{relative_font_path}'")
+        if relative_font_path:
+
+            base_dir = os.path.dirname(os.path.abspath(__file__)) # Directory of the current script (main.py)
+            absolute_font_path = os.path.join(base_dir, relative_font_path)
+            absolute_font_path = os.path.normpath(absolute_font_path) # Clean up path (e.g., / vs \)
+
+            logger.info(f"Attempting to load font from absolute path: '{absolute_font_path}'")
+
+            # Check if the absolute path exists
+            if not os.path.exists(absolute_font_path):
+                logger.error(f"Font file does not exist at absolute path: {absolute_font_path}")
+                font_id = -1
+            else:
+                logger.info("Font file exists at absolute path, attempting to add...")
+                try:
+                    # Pass the ABSOLUTE path to Qt
+                    font_id = QFontDatabase.addApplicationFont(absolute_font_path)
+                    logger.info(f"QFontDatabase.addApplicationFont returned ID: {font_id}") # Check return value
+                    if font_id == -1:
+                        logger.warning("QFontDatabase.addApplicationFont returned -1, indicating failure to load.")
+
+                except Exception as e:
+                    # This might not catch C++ crashes, but good practice
+                    logger.error(f"Exception during addApplicationFont: {e}")
+                    font_id = -1
+                    
+        global khmer_font_family
+        if font_id != -1:
+            font_families = QFontDatabase.applicationFontFamilies(font_id)
+            if font_families:
+                khmer_font_family = font_families[0]
+                logger.info(f"Successfully loaded Khmer font: {khmer_font_family}")
+                print(f"Successfully loaded Khmer font: {khmer_font_family}")
+            else:
+                logger.warning(f"Could not get family name for loaded Khmer font")
+                khmer_font_family = "Noto Sans Khmer"
+        else:
+            logger.warning(f"Failed to load Khmer font from {absolute_font_path}")
+            # Fallback to a common font that might support Khmer
+            khmer_font_family = "Noto Sans Khmer"
         
         # Check if app was started from autostart
         auto_started = is_started_from_autostart()

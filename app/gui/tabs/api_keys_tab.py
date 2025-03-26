@@ -90,7 +90,7 @@ class ApiKeysTab(QWidget):
         elevenlabs_layout.setContentsMargins(15, 15, 15, 15)
         
         # ElevenLabs API key description
-        self.elevenlabs_description = TranslatableLabel("<<api_keys_tab.elevenlabs_description>><br><b><<api_keys_tab.elevenlabs_recommendation>></b>")
+        self.elevenlabs_description = TranslatableLabel("<<api_keys_tab.elevenlabs_description>>")
         self.elevenlabs_description.setWordWrap(True)
         self.elevenlabs_description.setTextFormat(Qt.RichText)
         self.elevenlabs_description.setStyleSheet(get_description_label_style())
